@@ -1,0 +1,22 @@
+{
+  "id": "d045c849-8e3b-4e15-8a0b-c9611cf7ce2d",
+  "type": "app",
+  "main": "app.2cb85d2e.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "跳转地址",
+      "资产ID",
+      "筛选1展示字段",
+      "筛选1传递字段",
+      "筛选2展示字段",
+      "筛选2传递字段"
+    ]
+  }
+}
