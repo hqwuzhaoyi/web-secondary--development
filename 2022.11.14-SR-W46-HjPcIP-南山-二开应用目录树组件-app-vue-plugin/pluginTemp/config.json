@@ -1,7 +1,7 @@
 {
-  "id": "5e962462-d59b-4b5f-9ac6-16b015243e00",
+  "id": "0a9c2324-6168-4d25-90b7-7f2eafa18207",
   "type": "app",
-  "main": "app.fa4b885e.js",
+  "main": "app.0f9158ed.js",
   "version": "2",
   "props": {
     "type": "customize",
@@ -11,8 +11,10 @@
     "lib": [],
     "css_script": [],
     "customconf": [
-      "id",
-      "buttons"
+      "modelId",
+      "appVariablesName"
     ]
-  }
+  },
+  "requirement-number": "SR-W46-HjPcIP",
+  "requirement-name": "二开应用目录树组件"
 }
