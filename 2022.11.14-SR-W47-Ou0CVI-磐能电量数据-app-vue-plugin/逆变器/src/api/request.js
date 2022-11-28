@@ -4,11 +4,11 @@ import qs from "querystringify";
 let apiContextPath = "";
 if (process.env.NODE_ENV === "development") {
   document.cookie =
-    "token=eyJhbGciOiJIUzI1NiJ9.eyJsb2dpblRpbWVzdGFtcCI6MTY2ODg0NjcyMjAxNywidXNlcklkIjoiMTIzNDU2Nzg5MCJ9.txFPTPkvFsT6wt94xTKl2eA_8iyftzC7aEidbyI6PbI";
-  // "token=eyJhbGciOiJIUzI1NiJ9.eyJsb2dpblRpbWVzdGFtcCI6MTY2ODc2MDY4MDg5OSwidXNlcklkIjoiMTIzNDU2Nzg5MCJ9.LXUQxL42fR5hbQAPwjpo5n_AfYtKMLc7c4Zi_SkBlQU";
+    "token=eyJhbGciOiJIUzI1NiJ9.eyJsb2dpblRpbWVzdGFtcCI6MTY2OTI5NzkzNDEwMSwidXNlcklkIjoiMTIzNDU2Nzg5MCJ9.k6-y5RzeB14WDPYhXy4ERZwYZH-pvp1AYRR4iHiPbXk";
+  // "token=eyJhbGciOiJIUzI1NiJ9.eyJsb2dpblRpbWVzdGFtcCI6MTY2OTAxNzk4ODE2NywidXNlcklkIjoiMTIzNDU2Nzg5MCJ9.JQ9RzoTE5AIyeG4voNbUBTQRsEuaxp8ybVPhBhr7fvE";
   document.cookie =
-    "refreshToken=eyJhbGciOiJIUzI1NiJ9.eyJsb2dpblRpbWVzdGFtcCI6MTY2ODg0NjcyMjAyMX0.1Hs8IXj9PMF7jUtOwlOg3YEoMkEDtAo_dTi2Y_dQXmQ";
-  // "refreshToken=eyJhbGciOiJIUzI1NiJ9.eyJsb2dpblRpbWVzdGFtcCI6MTY2ODgyNDcwNDM1NH0.aXLtC4ffrGy-8C-D9rgNaVXeKGXFjK8T1jWVc5Mxym0";
+    "refreshToken=eyJhbGciOiJIUzI1NiJ9.eyJsb2dpblRpbWVzdGFtcCI6MTY2OTI5NzkzNDEwM30.D5vszpoZh5yv7mWSXelr8IhP93jPZpIBqDvM5NxRvag";
+  // "refreshToken=eyJhbGciOiJIUzI1NiJ9.eyJsb2dpblRpbWVzdGFtcCI6MTY2OTAxNzk4ODE3MX0.akPb_rfnaLBeFaJCxyk4AXcXdzkR1xXgpISmkm9KJbE";
   document.cookie = "username=admin";
   document.cookie = "windowOnline=true";
   apiContextPath = "/api";
@@ -16,7 +16,7 @@ if (process.env.NODE_ENV === "development") {
 let a = '/dtyq/pngf/'
 const prefix = window.apiContextPathPrefix ? (window.apiContextPathPrefix + "/") : ""
 const instance = axios.create({
-  baseURL: `${prefix}${apiContextPath}/sdata/rest`,
+  baseURL: `${apiContextPath}/dtyq/pngf/sdata/rest`,
   timeout: 60000,
   validateStatus: function (status) {
     return status >= 200 && status < 300; // default
