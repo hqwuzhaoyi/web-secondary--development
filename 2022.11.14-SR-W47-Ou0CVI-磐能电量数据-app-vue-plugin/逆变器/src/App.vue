@@ -1147,7 +1147,7 @@ export default {
           id: serName[this.fdField][i],
           symbolRotate: rotae,
           data: dataA,
-          sampling: "lttb",
+
           itemStyle: {
             color: serColor[this.fdField] && serColor[this.fdField][i] || color[i]
           }
