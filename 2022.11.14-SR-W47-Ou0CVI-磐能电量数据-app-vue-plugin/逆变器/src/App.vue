@@ -513,8 +513,7 @@ export default {
       realDataT: {},
       realDataB: [],
       //逆变器id
-      equipmentId: null ||
-        1999117999234,
+      equipmentId: null || 1999117999234,
     }
   },
   mounted() {
@@ -1081,14 +1080,16 @@ export default {
       param.type = this.value
       let { data } = await queryOperationCurve(param)
 
+      const seriesKey = { pvdy: "PV", pvdl: "PV", mpptdy: "MPPT", mpptdl: "MPPT" }
       const ex = { pvdy: "U", pvdl: "A", mpptdy: "U", mpptdl: "A" }
+      const key = seriesKey[this.fdField]
       const exUnit = ex[this.fdField]
       if (exUnit) {
         const showList = [];
         data.forEach(i => {
-          const { PV } = i;
-          if (!showList.includes(PV + exUnit)) {
-            showList.push(PV + exUnit)
+          const listKey = i[key] + exUnit;
+          if (!showList.includes(listKey)) {
+            showList.push(listKey)
           }
         })
         serData[this.fdField] = showList;
