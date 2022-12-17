@@ -86,10 +86,9 @@
         <div class="PlantForm_title">
           <div>
             <span class="drawerTitle">计划信息</span>
-            <el-select v-model="remoteValue" multiple filterable remote reserve-keyword placeholder="请输入关键词"
-              :remote-method="remoteMethod" :loading="loading">
-              <el-option v-for="item in remoteFilter" :key="item.value" :label="item.label" :value="item.value">
-              </el-option>
+            <el-select style="margin-left: 20px" size="small" v-model="remoteValue" filterable remote reserve-keyword placeholder="请输入关键词"
+              :remote-method="remoteMethod" :loading="loading" @change="selectMuBan">
+              <el-option v-for="item in remoteFilter" :key="item.data_id" :label="item.plan_number" :value="item"></el-option>
             </el-select>
           </div>
           <el-button style="width: 96px; font-size: 14px;" size="small" type="primary" @click="saveSub('planForm')"
@@ -100,24 +99,26 @@
         </div>
         <div class="PlantForm_content">
           <el-form :model="planForm" :rules="rules" ref="planForm" size="small">
-            <el-form-item label="计划名称：" :label-width="formLabelWidth" prop="addName">
+            <el-form-item label="计划名称：" :label-width="formLabelWidth" prop="plan_name">
               <el-input v-model="planForm.plan_name" :clearable="true" placeholder="请输入名称"></el-input>
             </el-form-item>
             <el-form-item label="申报人：" :label-width="formLabelWidth" prop="applicant">
-              <el-input v-model="planForm.applicant" :readonly="true" :clearable="true" placeholder="请输入"></el-input>
+              <!-- <el-input v-model="planForm.applicant" :readonly="true" :clearable="true" placeholder="请输入"></el-input> -->
+              <el-select v-model="planForm.applicant" placeholder="请选择" :readonly="true">
+                <el-option :label="currentUser.name" :value="currentUser.id"></el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="申报单位：" :label-width="formLabelWidth" prop="applicant_unit">
               <el-select v-model="planForm.applicant_unit" placeholder="请选择" :readonly="true">
-                <el-option label="区域一" value="shanghai"></el-option>
-                <el-option label="区域二" value="beijing"></el-option>
+                <el-option :label="currentUser.office_name" :value="currentUser.officeId"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="申报子单位：" :label-width="formLabelWidth" prop="subunit">
+            <!-- <el-form-item label="申报子单位：" :label-width="formLabelWidth" prop="subunit">
               <el-select v-model="planForm.subunit" placeholder="请选择">
                 <el-option label="区域一" value="shanghai"></el-option>
                 <el-option label="区域二" value="beijing"></el-option>
               </el-select>
-            </el-form-item>
+            </el-form-item> -->
             <el-form-item label="申报时间：" :label-width="formLabelWidth" prop="applicant_date">
               <el-date-picker v-model="planForm.applicant_date" format="yyyy-MM-DD" type="date" placeholder="请选择日期">
               </el-date-picker>
@@ -537,7 +538,7 @@ export default {
   //   },
   // },
   data() {
-    let currentUser = window?.currentUser || {};
+    let currentUser = window?.currentUser || {name: "admin",id: "1234567890", office_name: "SO.MINE_OFFICE",officeId: "123456789"};
     return {
       currentUser, // 当前用户
       data: this.customConfig.data,
@@ -567,6 +568,7 @@ export default {
       remoteValue: {}, // 选中模板
       clickAddTtem: {}, // 新增项父级数据
       clickAddType: "", // 新增项父级类型
+      clickSonAddTtem: {}, // 新增项当前数据
       currentPage: 1,//当前页数
       pageSize: 10,//页数大小
       total: 0,
@@ -622,8 +624,11 @@ export default {
         plan_type: [
           { required: true, message: '请选择计划类型', trigger: 'change' }
         ],
+        plan_name: [
+          { required: true, message: '请输入计划名称', trigger: 'blur' }
+        ],
         addName: [
-          { required: true, message: '请输入名称', trigger: 'blur' }
+          { required: true, message: '请输入计划名称', trigger: 'blur' }
         ],
         project_name: [
           { required: true, message: '请输入工程名', trigger: 'blur' }
@@ -663,7 +668,7 @@ export default {
     "mode_type": "Plan",
     "tasks": [{ 
       "data_id": "",
-      "project_name": "任务1",
+      "project_name": "任务aaa",
       "project_type": "A",
       "parent_id": "",
       "function_area": "区域1",
@@ -674,7 +679,11 @@ export default {
       "mode_type": "Task",
       "procedures": [{ 
         "data_id": "",
-        "process_name": "工序1",
+        "process_name": "工序1vbbb",
+        "remark": "",
+        "parent_id": "",
+        "mode_type": "Procedure",
+        "steps": [{ 
           "data_id": "",
           "process_desc": "步骤1awd",
           "parent_id": "",
@@ -764,6 +773,19 @@ export default {
       switch (item.mode_type) {
         case "Plan":
           this.componentType = "PlantForm";
+          let plan = this.plantList[0];
+          this.planForm = {
+            data_id: "", // 主键
+            plan_name: plan.plan_name, // 计划名称
+            plan_number: "", //计划编号
+            plan_type: plan.plan_type, // 计划类型
+            applicant: this.currentUser.id, // 申报人
+            applicant_unit: this.currentUser.officeId, // 申报单位
+            subunit: "", // 子单元
+            applicant_date: new Date(), // 申报日期
+            quality_record_number: plan.quality_record_number, // 质量记录号
+            mode_type: "Plan", // 类型
+          }
           break;
         case "Task":
           this.componentType = "Task";
@@ -778,21 +800,51 @@ export default {
     // 新增计划
     addPalnt() {
       this.componentType = "PlantForm";
+      this.planForm = {
+        // data_id: "", // 主键
+        plan_name: "", // 计划名称
+        plan_number: "", //计划编号
+        plan_type: "", // 计划类型
+        applicant: this.currentUser.id, // 申报人
+        applicant_unit: this.currentUser.officeId, // 申报单位
+        subunit: "", // 子单元
+        applicant_date: new Date(), // 申报日期
+        quality_record_number: "NL/QR-PD-06", // 质量记录号
+        mode_type: "Plan", // 类型
+      }
     },
     // 保存提交
     saveSub(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          alert('submit!');
-          console.log('11111111');
+          let codeNum = this.get_NumberingRules(this.planForm.applicant_unit,this.planForm.plan_type,this.planForm.applicant_date);
+          this.planForm.plan_number = codeNum;
+          this.plantList[0] = JSON.parse(JSON.stringify(this.planForm));
           let { onChange } = this.customConfig;
-          onChange(e);
+          onChange(this.plantList[0]);
           this.forKey(this.plantList);
+          this.remoteValue = {};
         } else {
           console.log('error submit!!');
           return false;
         }
       });
+    },
+    get_NumberingRules(unitNo, planType, yearNo) {
+      // 年份
+      let year = new Date().getFullYear();
+      // 工程类别
+      let projectCategory = "";
+      planType == "大修单项" ? (projectCategory = "D") : (projectCategory = "W");
+      // 编号
+      let number = "";
+      if (projectCategory == "D") {
+          number = year;
+      } else {
+          let month = String(new Date().getMonth() + 1);
+          month.length < 1 ? (number = "0" + month) : (number = month);
+      }
+      return `${year}-${unitNo}${projectCategory}${number}`;
     },
     // 远程搜索
     remoteMethod(query) {
@@ -802,15 +854,15 @@ export default {
           mode_type: this.clickAddType,
           name: query
         }
-        queryAllMuBan(params).then(res => {
+        queryAllMuBan(params).then(res=>{
           this.loading = false;
           let { data } = res;
           this.remoteFilter = data;
-          console.log('全局搜索res', this.remoteFilter);
-        }).catch(err => {
+          console.log('全局搜索res',this.remoteFilter);
+        }).catch(err=>{
           this.loading = false;
           this.remoteFilter = [];
-          console.log('全局搜索err', err);
+          console.log('全局搜索err',err);
         })
       } else {
         this.remoteFilter = [];
@@ -819,12 +871,23 @@ export default {
     // 模板切换
     selectMuBan(item) {
       this.remoteValue = item;
-      console.log('this.clickSonAddTtem', this.clickSonAddTtem);
-
       switch (this.clickAddType) {
         case "Plan":
-          this.plantList[0] = JSON.parse(JSON.stringify(item));
-          console.log(this.plantList);
+          this.planForm = {
+            data_id: "",
+            plan_name: item.plan_name, // 计划名称
+            plan_number: "", 
+            plan_type: item.plan_type, // 计划类型
+            applicant: this.currentUser.id, 
+            applicant_unit: this.currentUser.officeId, // 申报单位
+            subunit: item.subunit, // 子单元
+            applicant_date: new Date(), // 申报日期
+            quality_record_number: item.quality_record_number, // 质量记录号
+            mode_type: "Plan", // 类型
+            tasks: item.tasks
+          }
+          console.log('this.planForm',this.planForm);
+          this.forKey([this.planForm]);
           break;
         case "Task":
           // this.clickSonAddTtem
@@ -862,9 +925,9 @@ export default {
         } else {
           keyVal = 'procedures'
         }
-        this.$nextTick(() => {
+        this.$nextTick(()=>{
           item[keyVal].splice(index, 1);
-          console.log('item', item);
+          console.log('item',item);
           this.forKey(this.plantList);
           this.changeForm(item)
         })
@@ -884,9 +947,8 @@ export default {
                 let tasks = [{ project_name: addName, mode_type: 'Task' }];
                 this.clickAddTtem.tasks = tasks;
               }
-              this.tasksPrievw = { project_name: addName, mode_type: 'Task' }
-              this.componentType = "Task";
               size = this.clickAddTtem.tasks.length;
+              this.componentType = "Task";
               this.clickSonAddTtem = this.clickAddTtem.tasks[size - 1];
               break;
             case "Task":
