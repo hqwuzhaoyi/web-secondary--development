@@ -292,8 +292,8 @@
       </div>
       <!-- 提交按钮 -->
       <div class="save_button">
-         <el-button type="primary" size="medium" @click="saveAllData">保 存</el-button>
-         <el-button size="medium">取 消</el-button>
+         <el-button type="primary" size="small" @click="saveAllData">保 存</el-button>
+         <el-button size="small">取 消</el-button>
       </div>
    </div>
 </template>
