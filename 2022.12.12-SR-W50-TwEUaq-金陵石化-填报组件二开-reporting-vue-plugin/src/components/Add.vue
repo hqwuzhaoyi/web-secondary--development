@@ -76,7 +76,7 @@
       <div v-if="componentType == 'emptyPage'" class="rightEmptyBox">
         <img class="rightEmptyIcon" src="../../pluginTemp/images/plantTask.png" alt="">
         <span class="rightEmptyText">请创建工程计划</span>
-        <el-button style="width: 124px; font-size: 16px;" size="small" type="primary" @click="addPalnt()" round
+        <el-button style="width: 124px; font-size: 16px;" size="small" type="primary" @click="addPalnt" round
           plain>＋新增计划</el-button>
       </div>
       <!-- 计划新增 -->
@@ -112,14 +112,14 @@
                 <el-option :label="currentUser.office_name" :value="currentUser.officeId"></el-option>
               </el-select>
             </el-form-item>
-            <!-- <el-form-item label="申报子单位：" :label-width="formLabelWidth" prop="subunit">
+            <el-form-item label="申报子单位：" :label-width="formLabelWidth" key="subunit" prop="subunit">
               <el-select v-model="planForm.subunit" placeholder="请选择">
                 <el-option label="区域一" value="shanghai"></el-option>
                 <el-option label="区域二" value="beijing"></el-option>
               </el-select>
-            </el-form-item> -->
+            </el-form-item>
             <el-form-item label="申报时间：" key="applicant_date" :label-width="formLabelWidth" prop="applicant_date">
-              <el-date-picker v-model="planForm.applicant_date" format="yyyy-MM-DD" type="date" placeholder="请选择日期">
+              <el-date-picker v-model="planForm.applicant_date" format="yyyy-MM-dd" type="date" placeholder="请选择日期">
               </el-date-picker>
             </el-form-item>
             <el-form-item label="计划类型：" key="plan_type" :label-width="formLabelWidth" prop="plan_type">
@@ -132,9 +132,11 @@
               <el-input v-model="planForm.quality_record_number" autocomplete="off" placeholder="请输入"
                 :clearable="true"></el-input>
             </el-form-item>
-            <!-- <el-form-item label="预估工程费：" :label-width="formLabelWidth" prop="quality_record_number"> 
-              <el-input v-model="planForm.quality_record_number" autocomplete="off" placeholder="请输入" :clearable="true"></el-input>
-            </el-form-item> -->
+            <el-form-item label="预估工程费：" :label-width="formLabelWidth" prop="estimate_amount_project_cost"> 
+              <el-input v-model="planForm.estimate_amount_project_cost" type="number" placeholder="请输入">
+                <template slot="append">万元</template>
+              </el-input>
+            </el-form-item>
           </el-form>
         </div>
       </div>
@@ -263,9 +265,15 @@
 
           </el-descriptions>
           <el-descriptions>
-            <el-descriptions-item labelClassName="title_label" contentClassName="title_content" label="附件信息"> <a
-                :href="tasksPrievw.file" rel="noopener noreferrer">{{ tasksPrievw.file
-                }}</a></el-descriptions-item>
+            <el-descriptions-item labelClassName="title_label" contentClassName="title_content" label="附件信息">
+              <a :href="tasksPrievw.file" target="_blank" rel="noopener noreferrer"> {{ tasksPrievw.file_name ||
+                  tasksPrievw.file
+              }}</a>
+              <!-- <span
+                @click="previewMoadlFn" class="title_content_a_file">
+                {{ tasksPrievw.file_name || tasksPrievw.file }}
+              </span> -->
+            </el-descriptions-item>
           </el-descriptions>
         </div>
         <div class="task_operaList">
@@ -538,15 +546,25 @@
         <el-button type="primary" @click="addmaterials()">确 定</el-button>
       </span>
     </el-dialog>
+    <!-- 文件预览弹窗 -->
+    <el-dialog class="two_dialog" title="" :visible.sync="previewVisible" width="80%">
+      <iframe sandbox="allow-scripts allow-top-navigation allow-same-origin allow-popups" :src="iframeSrc" width='100%'
+        height='700' frameborder="0"></iframe>
+
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import Vue from "vue";
 import eventActionDefine from "./msgCompConfig";
-import { Menu, MenuItem, Submenu, Drawer, Form, FormItem, Button, Pagination, DatePicker, Dropdown, DropdownMenu, DropdownItem, Dialog, Descriptions, DescriptionsItem, Table, TableColumn, Input, InputNumber, Select, Upload } from "element-ui";
-import { queryUnit, queryDevices, queryOfficeUser, queryFunArea, queryMaterials, queryAllMuBan, uploadFile, puginImport } from '../api/asset'
+import {
+  Menu, MenuItem, Submenu, Drawer, Form, FormItem, Button, MessageBox,
+  Message, Pagination, DatePicker, Dropdown, DropdownMenu, DropdownItem, Dialog, Descriptions, DescriptionsItem, Table, TableColumn, Input, InputNumber, Select, Upload
+} from "element-ui";
+import { queryUnit, queryDevices, queryOfficeUser, queryFunArea, queryMaterials, queryAllMuBan, uploadFile, puginImport, getDictId, queryDict, queryPlanNumber } from '../api/asset'
 import { get_NumberingRules } from '../utils/numberingRules'
+import moment from "moment";
 
 Vue.use(Menu);
 Vue.use(MenuItem);
@@ -578,6 +596,7 @@ Vue.use(InputNumber);
 Vue.use(Pagination);
 Vue.use(Select);
 Vue.use(Upload);
+Vue.prototype.$message = Message;
 export default {
   name: "AddMultiple",
   props: {
@@ -589,15 +608,30 @@ export default {
   //   },
   // },
   data() {
+    let checkAge = (rule, value, callback) => {
+      if (!value) {
+        return callback(new Error('金额不能为空'));
+      }else {
+          callback();
+      }
+      // setTimeout(() => {
+      //   if (!Number.isInteger(value)) {
+      //     callback(new Error('请输入数字值'));
+      //   }else {
+      //     callback();
+      //   }
+      // }, 300);
+    };
     let currentUser = window?.currentUser || { name: "admin", id: "1234567890", office_name: "SO.MINE_OFFICE", officeId: "123456789" };
     return {
       currentUser, // 当前用户
       data: this.customConfig.data,
       propsConfiguration: this.customConfig.configuration || "{}",
       configuration: {},
-      componentType: "Procedure", // 组件类型 emptyPage-空白页 PlantForm-计划新增
+      componentType: "PlantForm", // 组件类型 emptyPage-空白页 PlantForm-计划新增
       plantList: [], // 大JSON
       menuActive: '',
+      title: "",
       formLabelWidth: "80", // 表单label宽
       detailedTable: [],  // 工序步骤数据
       procedureTable: [], //物料数据
@@ -609,6 +643,8 @@ export default {
       operationPrievw: {},//工序详情
       dialogVisible: false,
       materialsVisible: false,
+      previewVisible: false,
+      iframeSrc: '',//弹出框地址
       backState: { operation: "" },//返回状态
       nameForm: {
         addName: ""
@@ -623,6 +659,7 @@ export default {
       currentPage: 1,//当前页数
       pageSize: 10,//页数大小
       total: 0,
+      title: '',
       dataAll: [],//存放所有数据
       // 计划表单
       planForm: {
@@ -636,6 +673,7 @@ export default {
         applicant_date: new Date(), // 申报日期
         quality_record_number: "NL/QR-PD-06", // 质量记录号
         mode_type: "Plan", // 类型
+        estimate_amount_project_cost: 0 // 金额
       },
       //工程任务表单
       taskForm: {
@@ -654,7 +692,7 @@ export default {
       operationForm: {
         name: ''
       },
-      planTypeList: ['临时', '月度', '大修单项', '维保'],  // 计划类型
+      planTypeList: [],  // 计划类型
       // 校验
       rules: {
         applicant: [
@@ -680,6 +718,9 @@ export default {
         ],
         addName: [
           { required: true, message: '请输入计划名称', trigger: 'blur' }
+        ],
+        estimate_amount_project_cost: [
+          { validator: checkAge, trigger: 'blur' }
         ],
         project_name: [
           { required: true, message: '请输入工程名', trigger: 'blur' }
@@ -781,7 +822,8 @@ export default {
     }]
   }]`;
     console.log('currentUser', this.currentUser);
-
+    this.getDictId('plan_type_dictId'); // 计划类型字典
+    this.getDictId('quality_record_number_dictId'); // 计划质量编号字典
     window?.componentCenter?.register(
       this.customConfig.componentId,
       "comp",
@@ -808,15 +850,33 @@ export default {
       console.error("configuration解析错误", error);
       this.plantList = []
     }
-    let a = document.querySelector('.liuChen-page')
-    if (a.parentNode) a.parentNode.style.height = '100%'
-    if (a.parentNode) a.parentNode.parentNode.style.height = '100%'
-    if (a.parentNode) a.parentNode.parentNode.parentNode.style.height = '100%'
-    if (a.parentNode) a.parentNode.parentNode.parentNode.parentNode.style.height = '100%'
+    // let a = document.querySelector('.liuChen-page')
+    // if (a.parentNode) a.parentNode.style.height = '100%'
+    // if (a.parentNode) a.parentNode.parentNode.style.height = '100%'
+    // if (a.parentNode) a.parentNode.parentNode.parentNode.style.height = '100%'
+    // if (a.parentNode) a.parentNode.parentNode.parentNode.parentNode.style.height = '100%'
     this.querySelect()
     // queryOfficeUser()
   },
   methods: {
+    // 查询数据字典id
+    async getDictId(params) {
+      let { data } = await getDictId(params);
+      let { value } = data;
+      let res = await queryDict(value);
+      switch (params) {
+        case "plan_type_dictId": // 计划类型
+          this.planTypeList = res.data;
+          break;
+        case "quality_record_number_dictId":  // 质量编号
+          this.planForm.quality_record_number = res.data[0];
+          break;
+      }
+    },
+    // 查询字典
+    getDicty() {
+
+    },
     // 生成唯一key
     forKey(list) {
       list.forEach((x, index) => {
@@ -870,6 +930,7 @@ export default {
               applicant_date: new Date(), // 申报日期
               quality_record_number: plan.quality_record_number, // 质量记录号
               mode_type: "Plan", // 类型
+              estimate_amount_project_cost: plan.estimate_amount_project_cost || 0, // 金额
             }
             break;
           case "Task":
@@ -894,6 +955,7 @@ export default {
     },
     // 新增计划
     addPalnt() {
+      this.clickAddType = 'Plan'
       this.componentType = "PlantForm";
       this.planForm = {
         // data_id: "", // 主键
@@ -906,19 +968,48 @@ export default {
         applicant_date: new Date(), // 申报日期
         quality_record_number: "NL/QR-PD-06", // 质量记录号
         mode_type: "Plan", // 类型
+        estimate_amount_project_cost: 0 // 金额
       }
     },
     // 保存提交
-    saveSub(formName) {
+    async saveSub(formName) {
       this.$refs[formName].validate((valid) => {
         if (valid) {
-          let codeNum = get_NumberingRules(this.planForm.applicant_date, this.planForm.applicant_unit, this.planForm.plan_type, this.planForm?.tasks?.length || 0, [this.planForm], 'plan_number');
-          this.planForm.plan_number = codeNum;
-          this.plantList[0] = JSON.parse(JSON.stringify(this.planForm));
+         let isDate = moment(this.planForm.applicant_date).format("yyyy-MM-DD");
+         let year = isDate.split('-')[0];
+         let liushuihao = 0;
+         if (this.plantList.length == 0) {
+          this.plantList.push({plan_number: ""});
+         }
           let { onChange } = this.customConfig;
-          onChange(this.plantList[0]);
-          this.forKey(this.plantList);
-          this.remoteValue = {};
+          if (this.plantList.length == 0) this.plantList[0] = {}
+          if (this.planForm.plan_type == "大修单项") {
+            queryPlanNumber(year).then(res => {
+              liushuihao = Number(res.data) + 1;
+              let codeNum = get_NumberingRules(year, this.planForm.applicant_unit, this.planForm.plan_type, this.planForm?.tasks?.length || 0, liushuihao);
+              let money = Number(this.planForm.estimate_amount_project_cost).toFixed(1);
+              this.planForm.plan_number = codeNum;
+              this.planForm.estimate_amount_project_cost = money;
+              Object.keys(this.planForm).forEach(x=>{
+                this.plantList[0][x] = this.planForm[x];
+              })
+              onChange(this.plantList[0]);
+              this.forKey(this.plantList);
+              this.remoteValue = {};
+              console.log('this.plantList[0]',this.plantList[0]);
+            });
+          } else {
+            let codeNum = get_NumberingRules(year, this.planForm.applicant_unit, this.planForm.plan_type, this.planForm?.tasks?.length || 0, liushuihao);
+            let money = Number(this.planForm.estimate_amount_project_cost).toFixed(1);
+            this.planForm.plan_number = codeNum;
+            this.planForm.estimate_amount_project_cost = money;
+            Object.keys(this.planForm).forEach(x=>{
+              this.plantList[0][x] = this.planForm[x];
+            })
+            onChange(this.plantList[0]);
+            this.forKey(this.plantList);
+            this.remoteValue = {};
+          }
         } else {
           console.log('error submit!!');
           return false;
@@ -963,6 +1054,7 @@ export default {
             applicant_date: new Date(), // 申报日期
             quality_record_number: item.quality_record_number, // 质量记录号
             mode_type: "Plan", // 类型
+            estimate_amount_project_cost: item.estimate_amount_project_cost, // 金额
             tasks: item.tasks
           }
           console.log('this.planForm', this.planForm);
@@ -1218,11 +1310,18 @@ export default {
 
           uploadFile(temp)
             .then((data) => {
-
               this.taskForm.file = data.data[0]
+              this.taskForm.file_name = file.name
+              this.$message({
+                message: '上传成功',
+                type: 'success'
+              });
             })
             .catch((err) => {
-
+              this.$message({
+                message: '上传失败',
+                type: 'success'
+              });
             });
         }
       }
@@ -1244,6 +1343,17 @@ export default {
         }
       }
       return flag
+    },
+    //预览弹框方法
+    previewMoadlFn() {
+      this.previewVisible = true
+      let tempArr = ['.doc', '.docx', '.xls', '.xlsx']
+      let off = false
+      tempArr.forEach((x, i) => {
+        if (this.tasksPrievw.file.indexOf(x) != -1) off = true
+      })
+      this.iframeSrc = off ? 'https://docs.google.com/viewer?url=' + window.location.origin + this.tasksPrievw.file : this.tasksPrievw.file
+      // this.iframeSrc = this.tasksPrievw.file
     },
     // async inputChange(e) {
     //   this.data = e;
@@ -1323,7 +1433,7 @@ export default {
     padding: 24px 16px 0 16px;
     width: 248px;
     min-width: 248px;
-    height: 100%;
+    height: calc(100vh - 30px);
     background-color: #FFFFFF;
     border-radius: 8px;
     box-sizing: border-box;
@@ -1982,6 +2092,15 @@ export default {
       border-color: #0454f2;
     }
   }
+}
+
+.title_content_a_file {
+  cursor: pointer;
+  text-decoration-line: underline;
+
+
+  color: #1A79FF;
+
 }
 
 @font-face {
