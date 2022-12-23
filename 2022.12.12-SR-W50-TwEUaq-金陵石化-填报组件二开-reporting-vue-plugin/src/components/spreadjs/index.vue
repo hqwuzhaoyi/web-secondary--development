@@ -92,8 +92,8 @@ export default {
       try {
         let resultData =  await previewData(this.plantList)
 
-        if (resultData.data.tableData) {
-          value.tableData = resultData.data.tableData || []
+        if (resultData.data) {
+          value = resultData.data || {}
         }
         console.log(88888, resultData);
       } catch(e) {

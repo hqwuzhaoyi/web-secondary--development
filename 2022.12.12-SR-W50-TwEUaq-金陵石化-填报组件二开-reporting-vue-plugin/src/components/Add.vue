@@ -329,7 +329,7 @@
           <div class="operation_headr_itme preview-save">
             <el-button style="width: 96px; font-size: 14px;" size="small" type="primary" @click="previewExcel"
               round>
-              <img class="saveIcon" src="../../pluginTemp/images/saveIcon.png" alt="">
+              <img class="preview-icon" src="../../pluginTemp/images/preview.png" alt="">
               预览
             </el-button>
             <el-button type="primary" round @click="OperationSave">
@@ -2047,6 +2047,11 @@ this.taskForm.file_list.splice(i, 1)
 
         .preview-save {
           display: flex;
+
+          .preview-icon {
+            width: 14px;
+            margin-right: 5px;
+          }
         }
 
         .operation_headr_itme {
