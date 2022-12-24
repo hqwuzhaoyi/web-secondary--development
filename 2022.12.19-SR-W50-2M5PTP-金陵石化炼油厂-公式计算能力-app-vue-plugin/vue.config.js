@@ -1,9 +1,13 @@
+const path = require("path");
 module.exports = {
+   configureWebpack: {
+      devtool: "source-map",
+   },
    devServer: {
       disableHostCheck: true,
       proxy: {
          "/api": {
-            target: "http://10.15.112.2:18188",
+            target: "http://10.15.111.16:9094/",
             changeOrigin: true,
             pathRewrite: {
                "/api": "",
@@ -33,10 +37,20 @@ module.exports = {
             });
          });
       });
+      config.resolve.alias.set("@", resolve("./src"));
+      config.module
+         .rule("images")
+         .use("url-loader")
+         .loader("url-loader")
+         .tap((options) => Object.assign(options, { limit: 10 * 100 * 1024 * 1024 }));
       config.module
          .rule("fonts")
          .use("url-loader")
          .loader("url-loader")
-         .tap((options) => Object.assign(options, { limit: 1 * 100 * 1024 * 1024 }));
+         .tap((options) => Object.assign(options, { limit: 10 * 100 * 1024 * 1024 }));
    },
 };
+
+function resolve(dir) {
+   return path.join(__dirname, dir);
+}
