@@ -68,3 +68,14 @@ export const queryzidanwei = params =>
 export const previewData = params =>
   request.post(`ext/plan/apply/previewData?template_id=LYC1`, params);
 
+/*
+*  excel模版编辑
+*/
+export const templateSave = params =>
+  request.post(`ext/spreadjs/template/save`, params);
+
+/*
+*  excel获取模版
+*/
+export const templateQuery = templateNo =>
+  request.get(`ext/spreadjs/template/query?templateNo=${templateNo}`);

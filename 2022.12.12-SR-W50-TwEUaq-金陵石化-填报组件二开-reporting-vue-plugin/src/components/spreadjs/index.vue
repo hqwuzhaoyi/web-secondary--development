@@ -1,13 +1,11 @@
 <template>
   <div class="spread-box">
     <div ref="spreadRef" class="spread-content" :style="{ width: '100%', height: '600px'}" />
-    <div @click="test">点击</div>
   </div>
 </template>
 
 <script>
-import { contentJson } from './utils'
-import { previewData } from '../../api/asset'
+import { previewData, templateQuery } from '../../api/asset'
 let sheetsDesigner = window.GC.Spread.Sheets.Designer;
 let workbook;
 let designerControl;
@@ -23,30 +21,19 @@ export default {
     };
   },
   mounted() {
-    // window.GC.Spread.Common.CultureManager.culture("zh-cn");
-    // const workbook = new window.GC.Spread.Sheets.Workbook(this.$refs.spreadRef, {
-    //   sheetCount: 1,
-    //   tabStripVisible: false,
-    //   newTabVisible: false,
-    //   scrollbarMaxAlign: true,
-    // });
+    window.GC.Spread.Common.CultureManager.culture("zh-cn");
+    workbook = new window.GC.Spread.Sheets.Workbook(this.$refs.spreadRef, {
+      sheetCount: 1,
+      tabStripVisible: false,
+      newTabVisible: false,
+      scrollbarMaxAlign: true,
+    });
 
-    // // workbookRef.current = workbook;
-    // // registerFonts(workbook);
+    // workbookRef.current = workbook;
+    // registerFonts(workbook);
 
     // let sheetsDesigner = window.GC.Spread.Sheets.Designer;
 
-    // var fontFamilyCmd = sheetsDesigner.getCommand('fontFamily');
-    // var customCNFont = [
-    //   { value: '宋体', text: '宋体' },
-    //   { value: '微软雅黑', text: '微软雅黑' },
-    //   { value: '黑体', text: '黑体' },
-    // ];
-    // fontFamilyCmd.dropdownList = customCNFont.concat(
-    //   fontFamilyCmd.dropdownList
-    // );
-
-    const GC = window.GC;
     var fontFamilyCmd = sheetsDesigner.getCommand('fontFamily');
     var customCNFont = [
       { value: '宋体', text: '宋体' },
@@ -57,23 +44,51 @@ export default {
       fontFamilyCmd.dropdownList
     );
 
-    var ribbonConfig = sheetsDesigner.DefaultConfig;
-    var designer = new sheetsDesigner.Designer(this.$refs.spreadRef);
-    console.log('designer', designer);
-    designer.setConfig(ribbonConfig);
-    workbook = designer.getWorkbook();
+    // const GC = window.GC;
+    // var fontFamilyCmd = sheetsDesigner.getCommand('fontFamily');
+    // var customCNFont = [
+    //   { value: '宋体', text: '宋体' },
+    //   { value: '微软雅黑', text: '微软雅黑' },
+    //   { value: '黑体', text: '黑体' },
+    // ];
+    // fontFamilyCmd.dropdownList = customCNFont.concat(
+    //   fontFamilyCmd.dropdownList
+    // );
 
-    workbook.options.scrollbarShowMax = true;
-    workbook.options.scrollbarMaxAlign = true;
+    // var ribbonConfig = sheetsDesigner.DefaultConfig;
+    // var designer = new sheetsDesigner.Designer(this.$refs.spreadRef);
+    // console.log('designer', designer);
+    // designer.setConfig(ribbonConfig);
+    // workbook = designer.getWorkbook();
+
+    // workbook.options.scrollbarShowMax = true;
+    // workbook.options.scrollbarMaxAlign = true;
 
     console.log('workbook: ', workbook);
 
-    workbook.fromJSON(contentJson)
-    this.showData();
+
+    this.init();
   },
   methods: {
-    test() {
-      console.log(1111, workbook.toJSON())
+    async init() {
+      let { data } = await templateQuery("LYC1");
+      let { content, header_content } = data[0]
+      let resultData = JSON.parse(content);
+
+      resultData.tabStripVisible = false;
+      resultData.newTabVisible = false;
+      resultData.showHorizontalScrollbar = false;
+      resultData.scrollbarMaxAlign = true;
+      resultData.showVerticalScrollbar = false;
+      resultData.highlightInvalidData = false;
+
+      // Object.keys(resultData.sheets || {}).forEach((item) => {
+      //   const sheet = resultData.sheets[item];
+      //   sheet.rowHeaderVisible = false;
+      //   sheet.colHeaderVisible = false;
+      // });
+      workbook.fromJSON(resultData);
+      this.showData();
     },
     async showData() {
       const sheet1 = workbook.getSheet(0);
@@ -81,12 +96,7 @@ export default {
       style.hAlign = window.GC.Spread.Sheets.HorizontalAlign.center;
       style.vAlign = window.GC.Spread.Sheets.VerticalAlign.center;
       sheet1.setDefaultStyle(style, window.GC.Spread.Sheets.SheetArea.viewport);
-      let value = {
-        // tableData: [{
-        //   serial_no: 123,
-        //   project_type: 567
-        // }]
-      }
+      let value = {};
 
       console.log(7777, this.plantList);
       try {

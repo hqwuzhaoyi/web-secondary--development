@@ -327,6 +327,11 @@
             </el-select>
           </div>
           <div class="operation_headr_itme preview-save">
+            <el-button v-if="templateNo" style="width: 96px; font-size: 14px;" size="small" type="primary" @click="excelEditVisible = true"
+              round>
+              <img class="preview-icon" src="../../pluginTemp/images/preview.png" alt="">
+              编辑模版
+            </el-button>
             <el-button style="width: 96px; font-size: 14px;" size="small" type="primary" @click="previewExcel"
               round>
               <img class="preview-icon" src="../../pluginTemp/images/preview.png" alt="">
@@ -521,9 +526,13 @@
         </div>
       </div>
     </div>
+    <!-- excel编辑 -->
+    <el-dialog class="excel-dialog" :title="title" :visible.sync="excelEditVisible" width="80%" append-to-body>
+      <SpreadJsEdit :plantList="plantList" v-if="excelEditVisible" />
+    </el-dialog>
     <!-- excel弹窗 -->
-    <el-dialog class="excel-dialog" :title="title" :visible.sync="excelVisible" width="80%">
-      <SpreadJs :plantList="plantList" />
+    <el-dialog class="excel-dialog" :title="title" :visible.sync="excelVisible" width="80%" append-to-body>
+      <SpreadJs :plantList="plantList" v-if="excelVisible" />
     </el-dialog>
     <!-- 弹窗 -->
     <el-dialog class="two_dialog" :title="title" :visible.sync="dialogVisible" width="30%">
@@ -591,7 +600,13 @@ import {
 import { queryUnit, queryDevices, queryOfficeUser, queryFunArea, queryMaterials, queryAllMuBan, uploadFile, puginImport, getDictId, queryDict, queryPlanNumber } from '../api/asset'
 import { get_NumberingRules } from '../utils/numberingRules';
 import SpreadJs from './spreadjs/index.vue';
+import SpreadJsEdit from './spreadjs/SpreadJsEdit.vue'
+import qs from "querystringify";
 import moment from "moment";
+
+const { templateNo } = qs.parse(
+  window.location.search
+);
 
 Vue.use(Menu);
 Vue.use(MenuItem);
@@ -631,7 +646,8 @@ export default {
     customConfig: Object,
   },
   components: {
-    SpreadJs
+    SpreadJs,
+    SpreadJsEdit
   },
   // computed: {
   //   componentType: function () {
@@ -669,6 +685,8 @@ export default {
       operationPrievw: {},//工序详情
       dialogVisible: false,
       excelVisible: false, // excel弹窗状态
+      excelEditVisible: false, // excel编辑态
+      templateNo: templateNo,
       materialsVisible: false,
       previewVisible: false,
       iframeSrc: '',//弹出框地址
