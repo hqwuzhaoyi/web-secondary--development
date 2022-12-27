@@ -82,8 +82,7 @@
       <div v-if="componentType == 'emptyPage'" class="rightEmptyBox">
         <img class="rightEmptyIcon" src="../../pluginTemp/images/plantTask.png" alt="">
         <span class="rightEmptyText">请创建工程计划</span>
-        <el-button style="width: 124px; font-size: 16px;" size="small" type="primary" @click="addPalnt" round
-          plain>＋新增计划</el-button>
+        <el-button style="width: 124px; font-size: 16px;" size="small" type="primary" @click="addPalnt" round plain>＋新增计划</el-button>
       </div>
       <!-- 计划新增 -->
       <div v-if="componentType == 'PlantForm'" class="addplantBox">
@@ -96,11 +95,23 @@
                 :value="item"></el-option>
             </el-select>
           </div>
-          <el-button style="width: 96px; font-size: 14px;" size="small" type="primary" @click="saveSub('planForm')"
-            round>
-            <img class="saveIcon" src="../../pluginTemp/images/saveIcon.png" alt="">
-            保存
-          </el-button>
+          <div class="operation_headr_itme preview-save">
+            <el-button v-if="templateNo" style="width: 96px; font-size: 14px;" size="small" type="primary" @click="excelEditVisible = true"
+              round>
+              <img class="preview-icon" src="../../pluginTemp/images/preview.png" alt="">
+              编辑模版
+            </el-button>
+            <el-button style="width: 96px; font-size: 14px;" size="small" type="primary" @click="previewExcel"
+              round>
+              <img class="preview-icon" src="../../pluginTemp/images/preview.png" alt="">
+              预览
+            </el-button>
+            <el-button style="width: 96px; font-size: 14px;" size="small" type="primary" @click="saveSub('planForm')"
+              round>
+              <img class="saveIcon" src="../../pluginTemp/images/saveIcon.png" alt="">
+              保存
+            </el-button>
+          </div>
         </div>
         <div class="PlantForm_content">
           <el-form :model="planForm" :rules="rules" ref="planForm" size="small">
@@ -110,12 +121,13 @@
             <el-form-item label="申报人：" key="applicant" :label-width="formLabelWidth" prop="applicant">
               <!-- <el-input v-model="planForm.applicant" :readonly="true" :clearable="true" placeholder="请输入"></el-input> -->
               <el-select v-model="planForm.applicant" :disabled="true" placeholder="请选择" :readonly="true">
-                <el-option :label="currentUserIS.name" :value="currentUserIS.id"></el-option>
+                <el-option v-if="pageMode == 'add'" :label="currentUserIS.name" :value="currentUserIS.id"></el-option>
+                <el-option v-if="pageMode == 'edit'" :label="editUser.loginName" :value="editUser.applicant"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item label="申报单位：" key="applicant_unit" :label-width="formLabelWidth" prop="applicant_unit">
               <el-select v-model="planForm.applicant_unit" :disabled="true" placeholder="请选择" :readonly="true">
-                <el-option :label="currentUserIS.office_name" :value="currentUserIS.officeId"></el-option>
+                <!-- <el-option :label="intlGetKeys(currentUserIS.office_name)" :value="currentUserIS.officeId"></el-option> -->
               </el-select>
             </el-form-item>
             <el-form-item v-if="this.subunitArr.length > 0" label="申报子单位：" :label-width="formLabelWidth" key="subunit"
@@ -126,7 +138,7 @@
               </el-select>
             </el-form-item>
             <el-form-item label="申报时间：" key="applicant_date" :label-width="formLabelWidth" prop="applicant_date">
-              <el-date-picker v-model="planForm.applicant_date" :disabled="true" format="yyyy-MM-dd" type="date" placeholder="请选择日期">
+              <el-date-picker v-model="planForm.applicant_date" :disabled="true" value-format="yyyy-MM-dd" format="yyyy-MM-dd" type="date" placeholder="请选择日期">
               </el-date-picker>
             </el-form-item>
             <el-form-item label="计划类型：" key="plan_type" :label-width="formLabelWidth" prop="plan_type">
@@ -304,10 +316,10 @@
           <div class="task_opear_main">
             <div class="task_operaList_item" v-for="(item, i) in tasksPrievw.procedures" :key="i">
               <div class="task_opera_name text_class">{{ item.process_name }}</div>
-              <div class="task_opera_step text_class"><span class="title_label">工序步骤：</span>{{ item.steps.length }}
+              <div class="task_opera_step text_class"><span class="title_label">工序步骤：</span>{{   item.steps?  item.steps.length:0}}
               </div>
               <div class="task_opera_procedure text_class"><span class="title_label">物料清单：</span>{{
-                  item.materials.length
+                  item.materials?  item.materials.length:0
               }}</div>
               <div class="task_opera_cz" @click="proceduresEdit(item, i, tasksPrievw)"><img
                   style="vertical-align: middle;" src="../../pluginTemp/images/Edit.png" alt="" srcset=""> 编辑</div>
@@ -327,16 +339,6 @@
             </el-select>
           </div>
           <div class="operation_headr_itme preview-save">
-            <el-button v-if="templateNo" style="width: 96px; font-size: 14px;" size="small" type="primary" @click="excelEditVisible = true"
-              round>
-              <img class="preview-icon" src="../../pluginTemp/images/preview.png" alt="">
-              编辑模版
-            </el-button>
-            <el-button style="width: 96px; font-size: 14px;" size="small" type="primary" @click="previewExcel"
-              round>
-              <img class="preview-icon" src="../../pluginTemp/images/preview.png" alt="">
-              预览
-            </el-button>
             <el-button type="primary" round @click="OperationSave">
               <svg style="margin-right:5px" width="14" height="14" viewBox="0 0 14 14" fill="#fff"
                 xmlns="http://www.w3.org/2000/svg">
@@ -597,7 +599,11 @@ import {
   Dialog, Descriptions, DescriptionsItem, Table, TableColumn, Input, 
   InputNumber, Select, Upload, Tooltip
 } from "element-ui";
-import { queryUnit, queryDevices, queryOfficeUser, queryFunArea, queryMaterials, queryAllMuBan, uploadFile, puginImport, getDictId, queryDict, queryPlanNumber } from '../api/asset'
+import { 
+  queryUnit, queryDevices, queryOfficeUser, queryFunArea,
+  queryMaterials, queryAllMuBan, uploadFile, puginImport, getDictId, 
+  queryDict, queryPlanNumber, queryAdmin, querySelsctAdmin
+} from '../api/asset'
 import { get_NumberingRules } from '../utils/numberingRules';
 import SpreadJs from './spreadjs/index.vue';
 import SpreadJsEdit from './spreadjs/SpreadJsEdit.vue'
@@ -649,11 +655,6 @@ export default {
     SpreadJs,
     SpreadJsEdit
   },
-  // computed: {
-  //   componentType: function () {
-  //     return "PlantForm";
-  //   },
-  // },
   data() {
     let checkAge = (rule, value, callback) => {
       if (!value) {
@@ -663,12 +664,21 @@ export default {
       }
     };
     let currentUserIS = window?.currentUser || { name: "admin", id: "1234567890", office_name: "SO.MINE_OFFICE", officeId: "123456789" };
-
+    let intlGetKeys = this.customConfig?.intlGetKey;
     return {
       currentUserIS, // 当前用户
+      intlGetKeys, // 国际化
       data: this.customConfig.data,
       propsConfiguration: this.customConfig.configuration || "{}",
       configuration: {},
+      pageMode: 'add',
+      editUser: {
+        applicant: "", // 申报人
+        loginName: "", // 名称
+        applicant_unit: "", // 申报单位
+        subunit: "", // 子单元
+        applicant_date: "", // 申报日期
+      },
       componentType: "PlantForm", // 组件类型 emptyPage-空白页 PlantForm-计划新增
       plantList: [], // 大JSON
       menuActive: '',
@@ -734,7 +744,7 @@ export default {
           url: 'https://fuss10.elemecdn.com/3/63/4e7f3a15429bfda99bce42a18cdd1jpeg.jpeg?imageMogr2/thumbnail/360x360/format/webp/quality/100'
         }]//附件
       },
-      //工序表单
+      //工序表单  //工序编辑页的数据
       operationForm: {
         name: ''
       },
@@ -751,7 +761,7 @@ export default {
           { required: true, message: '请输入申报子单元', trigger: 'change' }
         ],
         applicant_date: [
-          { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
+          { required: true, message: '请选择日期', trigger: 'change' }
         ],
         quality_record_number: [
           { required: true, message: '请输入质量记录号', trigger: 'blur' }
@@ -813,7 +823,7 @@ export default {
   },
   mounted() {
     console.log('customConfig',this.customConfig);
-    this.currentUserIS.office_name = this.customConfig.intlGetKey ? this.customConfig.intlGetKey(this.currentUserIS.office_name) : this.currentUserIS.office_name
+    // this.currentUserIS.office_name = this.customConfig.intlGetKey ? this.customConfig.intlGetKey(this.currentUserIS.office_name) : this.currentUserIS.office_name
     console.log('currentUserIS', this.currentUserIS, this.customConfig.intlGetKey);
     this.getDictId('plan_type_dictId'); // 计划类型字典
     this.getDictId('quality_record_number_dictId'); // 计划质量编号字典
@@ -827,10 +837,26 @@ export default {
       this.configuration = JSON.parse(this.propsConfiguration);
       this.plantList = JSON.parse(this.customConfig.data || '[]')
       if (this.plantList.length > 0) {
+        this.pageMode = 'edit'
+        Object.keys(this.editUser).forEach(x=>{
+          this.editUser[x] = this.plantList[0][x]
+        })
+        queryOfficeUser(this.editUser.applicant).then(res => {
+          this.subunitArr = res.data?.office_children || []
+        }).catch(err => {
+          this.subunitArr = []
+        })
         this.forKey(this.plantList);
         this.changeForm(this.plantList[0])
+        this.queryselestAdmins(this.editUser.applicant);
       } else {
+        this.pageMode = 'add'
         this.addPalnt()
+        queryOfficeUser(this.currentUserIS.officeId).then(res => {
+          this.subunitArr = res.data?.office_children || []
+        }).catch(err => {
+          this.subunitArr = []
+        })
       }
       setTimeout(() => {
         console.log('this.plantList', this.plantList)
@@ -841,11 +867,6 @@ export default {
     }
     
     this.querySelect()
-    queryOfficeUser(this.currentUserIS.officeId).then(res => {
-      this.subunitArr = res.data?.office_children || []
-    }).catch(err => {
-      this.subunitArr = []
-    })
   },
   methods: {
     // 查询数据字典id
@@ -861,6 +882,16 @@ export default {
           this.planForm.quality_record_number = res.data[0];
           break;
       }
+    },
+    // 查询所有用户
+    async queryAdmins() {
+      let { data } = await queryAdmin();
+      console.log("用户信息", list);
+    },
+    // 查询当前用户
+    async queryselestAdmins(params) {
+      let { data } = await querySelsctAdmin(params);
+      this.editUser.loginName = data[0].loginName;
     },
     // 生成唯一key
     forKey(list) {
@@ -920,10 +951,10 @@ export default {
               plan_name: plan.plan_name, // 计划名称
               plan_number: "", //计划编号
               plan_type: plan.plan_type, // 计划类型
-              applicant: this.currentUserIS.id, // 申报人
-              applicant_unit: this.currentUserIS.officeId, // 申报单位
-              subunit: plan.subunit, // 子单元
-              applicant_date: new Date(), // 申报日期
+              applicant: this.pageMode === "add" ? this.currentUserIS.id : plan.applicant, // 申报人
+              applicant_unit: this.pageMode === "add" ? this.currentUserIS.officeId : plan.applicant_unit, // 申报单位
+              subunit: plan.subunit ? plan.subunit : "", // 子单元
+              applicant_date: this.pageMode === "add" ? new Date() : plan.applicant_date, // 申报日期
               quality_record_number: plan.quality_record_number, // 质量记录号
               mode_type: "Plan", // 类型
               estimate_amount_project_cost: plan.estimate_amount_project_cost || null, // 金额
@@ -1076,10 +1107,10 @@ export default {
             plan_name: item.plan_name, // 计划名称
             plan_number: "",
             plan_type: item.plan_type, // 计划类型
-            applicant: this.currentUserIS.id,
-            applicant_unit: this.currentUserIS.officeId, // 申报单位
-            subunit: item.subunit, // 子单元
-            applicant_date: new Date(), // 申报日期
+            applicant: this.pageMode == "add" ? this.currentUserIS.id : this.editUser.applicant,
+            applicant_unit: this.pageMode == "add" ? this.currentUserIS.officeId : this.editUser.applicant_unit, // 申报单位
+            subunit: this.pageMode == "add" ? "" : this.editUser.subunit, // 子单元
+            applicant_date: this.pageMode == "add" ? new Date() : this.editUser.applicant_date, // 申报日期
             quality_record_number: item.quality_record_number, // 质量记录号
             mode_type: "Plan", // 类型
             estimate_amount_project_cost: item.estimate_amount_project_cost, // 金额
@@ -1389,8 +1420,12 @@ this.taskForm.file_list.splice(i, 1)
        * index：当前第几位
        */
       let flag = true
-      for (let i = 0; i < this.operationForm.materials.length; i++) {
-        if (row.data_id == this.operationForm.materials[i].data_id) {
+      console.log(this.operationForm);
+      if( !(this.operationForm.materials) ||  this.operationForm?.materials?.length==0){
+        return true
+      }else{
+        for (let i = 0; i < this.operationForm.materials.length; i++) {
+        if (row.material_code == this.operationForm.materials[i].material_code) {
           flag = false
           break
         } else {
@@ -1398,6 +1433,8 @@ this.taskForm.file_list.splice(i, 1)
         }
       }
       return flag
+      }
+   
     },
     //预览弹框方法
     previewMoadlFn() {
@@ -1721,6 +1758,18 @@ this.taskForm.file_list.splice(i, 1)
         display: flex;
         justify-content: space-between;
         align-items: center;
+
+        .preview-save {
+          display: flex;
+          height: 32px;
+
+          .preview-icon {
+            margin-bottom: -1px;
+            margin-right: 2px;
+            width: 13px;
+            height: 13px;
+          }
+        }
 
         .drawerTitle {
           font-weight: 500;
@@ -2060,15 +2109,6 @@ this.taskForm.file_list.splice(i, 1)
 
           .back_title {
             width: 70px;
-          }
-        }
-
-        .preview-save {
-          display: flex;
-
-          .preview-icon {
-            width: 14px;
-            margin-right: 5px;
           }
         }
 
