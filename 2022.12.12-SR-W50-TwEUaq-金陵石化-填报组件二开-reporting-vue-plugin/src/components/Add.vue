@@ -12,8 +12,8 @@
       <div v-if="plantList.length > 0" class="menu_list">
         <!-- 计划 -->
         <div class="menu_item" v-for="planTtem, planIndx in plantList" :key="planTtem.seletKey">
-          <div class="menu_item_box planIdent" :class="{ 'menu_item_box_active': menuActive == planTtem.seletKey }"
-            @click="changeForm(planTtem)">
+          <div class="menu_item_box planIdent" :class="{ 'menu_item_box_active': menuActive == planTtem.seletKey }" @click="changeForm(planTtem)">
+            <!-- <img class="menuIcon" src="../../pluginTemp/images/menuIcon.png" alt="" @click="openTheKey(planTtem)"> -->
             <img class="menuIcon" src="../../pluginTemp/images/menuIcon.png" alt="">
             <el-tooltip class="item" effect="dark" :content="planTtem.plan_name" placement="top-start">
               <span class="menuPlanTitle">{{ planTtem.plan_name }}</span>
@@ -29,25 +29,35 @@
             </el-dropdown>
           </div>
           <!-- 任务 -->
+          <!-- <div class="menu_item" v-for="taskItem, taskIndx in planTtem.tasks" :key="taskItem.seletKey" :style="{'display': planTtem.openKey == true ? 'block' : 'none'}"> -->
           <div class="menu_item" v-for="taskItem, taskIndx in planTtem.tasks" :key="taskItem.seletKey">
             <div class="menu_item_box taskIdent" :class="{ 'menu_item_box_active': menuActive == taskItem.seletKey }"
               @click="changeForm(taskItem)">
+              <!-- <img class="menuIcon" src="../../pluginTemp/images/menuIcon.png" alt="" @click="openTheKey(taskItem)"> -->
               <img class="menuIcon" src="../../pluginTemp/images/menuIcon.png" alt="">
               <el-tooltip class="item" effect="dark" :content="taskItem.project_name" placement="top-start">
                 <span class="taskTitle">{{ taskItem.project_name }}</span>
               </el-tooltip>
-              <el-dropdown class="dropdownBox" trigger="click" placement="bottom-start" @command="handleCommand">
+              <el-dropdown class="dropdownBox" trigger="click"  :hide-on-click='false' placement="bottom-start" @command="handleCommand">
                 <span class="el-dropdown-link">
                   <i class="el-icon-more"
                     :style="{ 'color': menuActive == taskItem.seletKey ? '#FFFFFF' : '#373A55' }"></i>
                 </span>
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item :command="{ mod: 'add', item: taskItem, index: taskIndx }">新增</el-dropdown-item>
-                  <el-dropdown-item :command="{ mod: 'del', item: planTtem, index: taskIndx }">删除</el-dropdown-item>
+             
+                  <el-popconfirm  v-if='taskItem.procedures?.length==0 || !taskItem.procedures' title="确定删除这条工程吗？" @confirm="handleCommand({ mod: 'del', item: planTtem, index: taskIndx })">
+                      <el-dropdown-item slot="reference" :command="{ mod: null  }"  > 删除</el-dropdown-item>
+                  </el-popconfirm>
+                  <el-popconfirm  v-else title="不可删除">
+                      <el-dropdown-item slot="reference" :command="{ mod: null  }"  > 删除</el-dropdown-item>
+                  </el-popconfirm>
+    <!-- <el-dropdown-item slot="reference"  :command="{ mod: 'del', item: planTtem, index: taskIndx }"> 删除</el-dropdown-item> -->
                 </el-dropdown-menu>
               </el-dropdown>
             </div>
             <!-- 工序 -->
+            <!-- <div class="menu_item" v-for="procedure, procedIdx in taskItem.procedures" :key="procedure.seletKey" :style="{'display': taskItem.openKey == true ? 'block' : 'none'}"> -->
             <div class="menu_item" v-for="procedure, procedIdx in taskItem.procedures" :key="procedure.seletKey">
               <div class="menu_item_box stepIdent" :class="{ 'menu_item_box_active': menuActive == procedure.seletKey }"
                 @click="changeForm(procedure)">
@@ -55,13 +65,17 @@
                 <el-tooltip class="item" effect="dark" :content="procedure.process_name" placement="top-start">
                   <span class="stepTitle">{{ procedure.process_name }}</span>
                 </el-tooltip>
-                <el-dropdown class="dropdownBox" trigger="click" placement="bottom-start" @command="handleCommand">
+                <el-dropdown class="dropdownBox"  :hide-on-click='false' trigger="click" placement="bottom-start" @command="handleCommand">
                   <span class="el-dropdown-link">
                     <i class="el-icon-more"
                       :style="{ 'color': menuActive == procedure.seletKey ? '#FFFFFF' : '#373A55' }"></i>
                   </span>
                   <el-dropdown-menu slot="dropdown">
-                    <el-dropdown-item :command="{ mod: 'del', item: taskItem, index: procedIdx }">删除</el-dropdown-item>
+
+                    <el-popconfirm   title="确定删除这条工序吗？" @confirm="handleCommand({ mod: 'del', item: taskItem, index: procedIdx })">
+                      <el-dropdown-item slot="reference" :command="{ mod: null  }"  > 删除</el-dropdown-item>
+                  </el-popconfirm>
+                    <!-- <el-dropdown-item :command="{ mod: 'del', item: taskItem, index: procedIdx }">删除</el-dropdown-item> -->
                   </el-dropdown-menu>
                 </el-dropdown>
               </div>
@@ -127,7 +141,8 @@
             </el-form-item>
             <el-form-item label="申报单位：" key="applicant_unit" :label-width="formLabelWidth" prop="applicant_unit">
               <el-select v-model="planForm.applicant_unit" :disabled="true" placeholder="请选择" :readonly="true">
-                <!-- <el-option :label="intlGetKeys(currentUserIS.office_name)" :value="currentUserIS.officeId"></el-option> -->
+                <el-option v-if="pageMode == 'add'" :label="intlGetKeys(currentUserIS.office_name)" :value="currentUserIS.officeId"></el-option>
+                <el-option v-if="pageMode == 'edit'" :label="editUser.office_name" :value="editUser.applicant_unit"></el-option>
               </el-select>
             </el-form-item>
             <el-form-item v-if="this.subunitArr.length > 0" label="申报子单位：" :label-width="formLabelWidth" key="subunit"
@@ -156,6 +171,19 @@
               <el-input v-model="planForm.estimate_amount_project_cost" type="number" placeholder="请输入" autocomplete="off">
                 <template slot="append">万元</template>
               </el-input>
+            </el-form-item>
+            <el-form-item v-if="component_add" label="是否加签：" :label-width="formLabelWidth"
+              prop="whether_signature">
+              <el-select v-model="planForm.whether_signature" placeholder="请选择" :disabled="component_only" key="whether_signature">
+                <el-option label="是" value="1"></el-option>
+                <el-option label="否" value="0"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-if="component_add && planForm.whether_signature == '1'" label="加签人员：" key="person_of_signature" :label-width="formLabelWidth"
+              prop="person_of_signature">
+                <el-select v-model="planForm.person_of_signature" placeholder="请选择" :disabled="component_only" multiple>
+                  <el-option v-for="(item, i) in users" :key="i" :label="item.loginName" :value="item.id"></el-option>
+                </el-select>
             </el-form-item>
           </el-form>
         </div>
@@ -195,16 +223,15 @@
                 <el-option label="B" value="B"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="功能区域：" key="function_area" :label-width="formLabelWidth" prop="function_area">
-              <el-select v-model="taskForm.function_area" placeholder="请选择">
+            <el-form-item label="功能区域："    key="function_area"   :label-width="formLabelWidth" prop="function_area">
+              <el-select v-model="taskForm.function_area"   multiple placeholder="请选择">
                 <el-option v-for="(item, i) in funAreaArr  " :key="i" :label="item.function_area"
                   :value="item.function_area"></el-option>
-
               </el-select>
             </el-form-item>
-            <el-form-item label="关联设备：" key="associated_devices" :label-width="formLabelWidth"
+            <el-form-item label="关联设备："   key="associated_devices" :label-width="formLabelWidth"
               prop="associated_devices">
-              <el-select v-model="taskForm.associated_devices" placeholder="请选择">
+              <el-select v-model="taskForm.associated_devices"  multiple placeholder="请选择">
                 <el-option v-for="(item, i) in devicesArr  " :key="i" :label="item.associated_devices"
                   :value="item.associated_devices"></el-option>
               </el-select>
@@ -219,6 +246,20 @@
                 v-model="taskForm.remark">
               </el-input>
             </el-form-item>
+            <el-form-item v-if="keZhang" label="专业：" key="professional" :label-width="formLabelWidth"
+              prop="professional">
+              <el-select v-model="taskForm.professional" placeholder="请选择">
+                <el-option v-for="(item, i) in majorList" :key="i" :label="item"
+                  :value="item"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item v-if="keZhang" label="施工单位：" key="unit_of_construction " :label-width="formLabelWidth"
+              prop="unit_of_construction ">
+              <el-select v-model="taskForm.unit_of_construction" placeholder="请选择">
+                <el-option v-for="(item, i) in abbreviationLIst" :key="i" :label="item.abbreviation_of_unit"
+                  :value="item.abbreviation_of_unit"></el-option>
+              </el-select>
+            </el-form-item>
             <el-form-item label="附件信息：" :label-width="formLabelWidth" prop="file">
               <div>
                 <!-- <el-upload class="upload-demo" action="api/image/upload" :on-change="handleChange"> -->
@@ -228,21 +269,16 @@
                     this.$refs.fileBtn.click();
                   }
                 "><span class="iconfont">&#xe63d;</span> 上传附件</button>
-              
                 <!-- </el-upload> -->
-
               </div>
               <div class="file_list"  v-for="(item,i) in taskForm.file_list" :key="i"   >
-                  <span  style='margin-right: 15px;'> {{item.file_name}}</span>
-                  <span style='cursor: pointer;'   @click='deleteClik(i)' ><i class="el-icon-delete"></i></span>
+                  <span  style="margin-right: 15px;"> {{item.file_name}}</span>
+                  <span style="cursor: pointer;" @click='deleteClik(i)' ><i class="el-icon-delete"></i></span>
                 </div>
-
             </el-form-item>
             <el-form-item label="" :label-width="formLabelWidth" prop="">
               <input type="text" style="display:none">
-
             </el-form-item>
-
           </el-form>
         </div>
       </div>
@@ -411,7 +447,9 @@
 
                   <el-table-column label="操作">
                     <template slot-scope="scope">
-                      <el-button type="text" @click="detailedDelFn(scope)" size="small">删除</el-button>
+                      <el-popconfirm  title="确认删除这条记录吗？"  @confirm="detailedDelFn(scope)"   >
+                          <el-button slot="reference" type="text"  size="small">删除</el-button>
+                        </el-popconfirm>
                     </template>
                   </el-table-column>
                   <div slot="append" class="child_end_fill">
@@ -451,20 +489,6 @@
                       <el-input v-model="scope.row.additional_note" :controls="false" type="text" size="small" />
                     </template>
                   </el-table-column>
-
-                  <el-table-column prop="sampleThickness" label="主单位">
-                    <template slot-scope="scope">
-                      <el-input v-model="scope.row.main_unit" :controls="false" type="text" :disabled="true"
-                        size="small" />
-                    </template>
-                  </el-table-column>
-
-                  <el-table-column prop="sampleThickness" label="副单位">
-                    <template slot-scope="scope">
-                      <el-input v-model="scope.row.auxiliary_unit" :controls="false" type="text" :disabled="true"
-                        size="small" />
-                    </template>
-                  </el-table-column>
                   <el-table-column prop="sampleThickness" label="材料需求量">
                     <template slot-scope="scope">
                       <el-form-item :clearable="true" :prop="`materials.${scope.$index}.material_demand`"
@@ -473,7 +497,6 @@
                           :controls="false" @change="changeItemState(scope.$index, 'demand_state')" type="text"
                           size="small" />
                       </el-form-item>
-
                     </template>
                   </el-table-column>
                   <el-table-column prop="sampleThickness" label="材料采购量（主单位）">
@@ -485,7 +508,12 @@
                           @change="changeItemState(scope.$index, 'purchase_main_state')"></el-input>
 
                       </el-form-item>
-
+                    </template>
+                  </el-table-column>
+                  <el-table-column prop="sampleThickness" label="主单位">
+                    <template slot-scope="scope">
+                      <el-input v-model="scope.row.main_unit" :controls="false" type="text" :disabled="true"
+                        size="small" />
                     </template>
                   </el-table-column>
                   <el-table-column prop="sampleThickness" label="材料采购量（副单位）">
@@ -498,6 +526,12 @@
                       </el-form-item>
                     </template>
                   </el-table-column>
+                  <el-table-column prop="sampleThickness" label="副单位">
+                    <template slot-scope="scope">
+                      <el-input v-model="scope.row.auxiliary_unit" :controls="false" type="text" :disabled="true"
+                        size="small" />
+                    </template>
+                  </el-table-column>
                   <el-table-column prop="sampleThickness" label="是否提供车间">
                     <template slot-scope="scope">
                       <el-select v-model="scope.row.whether_workshop_supply" placeholder="请选择">
@@ -506,13 +540,14 @@
                       </el-select>
                     </template>
                   </el-table-column>
-
-
                   <el-table-column label="操作">
                     <template slot-scope="scope">
-                      <el-button type="text" @click="calculationClick(scope.row, scope.$index)"
+                        <el-button   type="text" @click="calculationClick(scope.row, scope.$index)"
                         size="small">计算</el-button>
-                      <el-button type="text" @click="procedureDelFn(scope.row)" size="small">删除</el-button>
+                        <el-popconfirm  title="确认删除这条记录吗？"  @confirm="procedureDelFn(scope)"   >
+                          <el-button slot="reference" type="text"  size="small">删除</el-button>
+                  </el-popconfirm>
+                    
                     </template>
                   </el-table-column>
                   <div slot="append" class="child_end_fill">
@@ -554,6 +589,15 @@
     </el-dialog>
     <!-- 物料清单新增弹窗 -->
     <el-dialog class="two_dialog" title="物料清单表" :visible.sync="materialsVisible" width="80%">
+        <div class="select_filed">
+            <el-row :gutter="20">
+              <el-col  class='select_filed_col' :span="6">物料编号： <el-input width='250px'  placeholder="请输入物料编号" v-model="queryParams.material_code" ></el-input> </el-col>
+  <el-col class='select_filed_col' :span="6">物料名称：<el-input placeholder="请输入物料名称"  v-model="queryParams.material_name "></el-input></el-col>
+  <el-col class='select_filed_col' :span="6">物料分类：<el-input placeholder="请输入物料分类"  v-model="queryParams.material_type"></el-input></el-col>
+  <el-col class='select_filed_col' :span="4"><button class='queyr_button'  @click='procedureAddFn'>查询</button> <button @click='restFn'  class='queyr_button rest_btn'>重置</button> </el-col>
+            </el-row>
+        </div>
+
       <el-table :data="materialsTable" row-key="data_id" ref="multipleTable" stripe style="width: 100%"
         tooltip-effect="dark" @selection-change="handleSelectionChange"
         :header-cell-style="{ padding: 0 + 'px', fontSize: '12px', fontWeight: 400 }"
@@ -567,6 +611,8 @@
         </el-table-column>
         <el-table-column prop="material_name" label="物料名称">
         </el-table-column>
+        <el-table-column prop="material_type" label="物料分类">
+        </el-table-column>
         <el-table-column prop="main_unit" label="主单位">
         </el-table-column>
         <el-table-column prop="auxiliary_unit" label="副单位">
@@ -577,7 +623,7 @@
         layout="total, sizes, prev, pager, next, jumper" :total="total">
       </el-pagination>
       <span slot="footer" class="dialog-footer">
-        <el-button @click="materialsVisible = false">取 消</el-button>
+        <el-button @click="materialsVisible = false;">取 消</el-button>
         <el-button type="primary" @click="addmaterials()">确 定</el-button>
       </span>
     </el-dialog>
@@ -596,13 +642,14 @@ import eventActionDefine from "./msgCompConfig";
 import {
   Menu, MenuItem, Submenu, Drawer, Form, FormItem, Button, MessageBox,
   Message, Pagination, DatePicker, Dropdown, DropdownMenu, DropdownItem,
-  Dialog, Descriptions, DescriptionsItem, Table, TableColumn, Input, 
-  InputNumber, Select, Upload, Tooltip
+  Dialog, Descriptions, DescriptionsItem, Table, TableColumn, Input, Row,Col,
+  InputNumber, Select, Upload, Tooltip,Popconfirm,Popover
 } from "element-ui";
 import { 
   queryUnit, queryDevices, queryOfficeUser, queryFunArea,
   queryMaterials, queryAllMuBan, uploadFile, puginImport, getDictId, 
-  queryDict, queryPlanNumber, queryAdmin, querySelsctAdmin
+  queryDict, queryPlanNumber, queryAdmin, querySelsctAdmin, 
+  queryConstructionCompany,
 } from '../api/asset'
 import { get_NumberingRules } from '../utils/numberingRules';
 import SpreadJs from './spreadjs/index.vue';
@@ -614,6 +661,10 @@ const { templateNo } = qs.parse(
   window.location.search
 );
 
+Vue.use(Popconfirm);
+Vue.use(Row);
+Vue.use(Col);
+Vue.use(Popover);
 Vue.use(Menu);
 Vue.use(MenuItem);
 Vue.use(Submenu);
@@ -671,11 +722,20 @@ export default {
       data: this.customConfig.data,
       propsConfiguration: this.customConfig.configuration || "{}",
       configuration: {},
+      component_id: "", // 节点
+      component_add: false, // 节点新增字段
+      component_only: true, // 节点只读字段
+      keZhang: false, // 科长节点字段
+      majorList: [], // 专业
+      abbreviationLIst: [], // 施工单位
+      users: [], // 用户组件
+      jieDianXinXi: ['73db0356-d6f4-4ab9-b3ad-b5eb054a4621','2e133bcc-3571-4006-bf54-d9fe62a9c7a6','fa61df90-9915-4b91-8cd5-486256297e17','02b85f11-936e-487c-a747-2ce664ab91f1'],
       pageMode: 'add',
       editUser: {
         applicant: "", // 申报人
         loginName: "", // 名称
         applicant_unit: "", // 申报单位
+        office_name: "", // 申报单位名称
         subunit: "", // 子单元
         applicant_date: "", // 申报日期
       },
@@ -715,6 +775,11 @@ export default {
       pageSize: 10,//页数大小
       total: 0,
       title: '',
+      queryParams:{
+        material_code:'',
+        material_type:'',
+        material_name:'',
+      },//查询物料子表弹框
       dataAll: [],//存放所有数据
       // 计划表单
       planForm: {
@@ -738,6 +803,8 @@ export default {
         function_area: '',//功能区域 
         associated_devices: '',//关系设备
         requirement_for_construction: '',//规范
+        unit_of_construction: "", // 承包商
+        professional: "", // 专业
         remark: '',//备注
         file: [{
           name: 'food.jpeg',
@@ -777,6 +844,12 @@ export default {
         ],
         estimate_amount_project_cost: [
           { validator: checkAge, trigger: 'blur' }
+        ],
+        whether_signature: [
+          { required: true, message: '请选择是否加签', trigger: 'change' }
+        ],
+        person_of_signature: [
+          { required: true, message: '请选择加签人员', trigger: 'change' }
         ],
         project_name: [
           { required: true, message: '请输入工程名', trigger: 'blur' }
@@ -822,11 +895,10 @@ export default {
     };
   },
   mounted() {
-    console.log('customConfig',this.customConfig);
-    // this.currentUserIS.office_name = this.customConfig.intlGetKey ? this.customConfig.intlGetKey(this.currentUserIS.office_name) : this.currentUserIS.office_name
-    console.log('currentUserIS', this.currentUserIS, this.customConfig.intlGetKey);
-    this.getDictId('plan_type_dictId'); // 计划类型字典
-    this.getDictId('quality_record_number_dictId'); // 计划质量编号字典
+    console.log('currentUserIS', this.currentUserIS, this.customConfig);
+    this.getDictId('plan_apply','plan_type_dictId'); // 计划类型字典
+    this.getDictId('plan_apply','quality_record_number_dictId'); // 计划质量编号字典
+    this.getDictId('t_contractor_management','professional'); // 计划质量编号字典
     window?.componentCenter?.register(
       this.customConfig.componentId,
       "comp",
@@ -838,6 +910,7 @@ export default {
       this.plantList = JSON.parse(this.customConfig.data || '[]')
       if (this.plantList.length > 0) {
         this.pageMode = 'edit'
+        this.isJieDian(); // 判断节点
         Object.keys(this.editUser).forEach(x=>{
           this.editUser[x] = this.plantList[0][x]
         })
@@ -849,6 +922,8 @@ export default {
         this.forKey(this.plantList);
         this.changeForm(this.plantList[0])
         this.queryselestAdmins(this.editUser.applicant);
+        this.queryConstruction(); // 查询工程
+        this.queryAdmins() // 所有用户
       } else {
         this.pageMode = 'add'
         this.addPalnt()
@@ -869,37 +944,84 @@ export default {
     this.querySelect()
   },
   methods: {
-    // 查询数据字典id
-    async getDictId(params) {
+    // 判断当前节点
+    isJieDian(){
+      this.component_id = this.getQueryString('component_id');
+      console.log('this.component_id',this.component_id);
+      switch (this.component_id) {
+        case "73db0356-d6f4-4ab9-b3ad-b5eb054a4621": // 1. 工程科科长审核时
+          this.component_add = true;
+          this.component_only = false;
+          this.keZhang = true;
+          break;
+        case "2e133bcc-3571-4006-bf54-d9fe62a9c7a6": // 2. 加签人员审批（是否加签为是时）
+          this.component_add = true;
+          this.component_only = false;
+          break;
+        case "fa61df90-9915-4b91-8cd5-486256297e17": // 3. 工程科副部长审批：“审批中”节点
+          this.component_add = true;
+          this.component_only = true;
+          break;
+        case "02b85f11-936e-487c-a747-2ce664ab91f1": // 4. 工程科部长审批：“待完成”节点
+          this.component_add = true;
+          this.component_only = true;
+          break;
+      }
+    },
+    getQueryString (name) {
+      const reg = new RegExp(name + "=([^&]*)(&|$)", "i");
+      const r = window.location.search.substr(1).match(reg);
+      if (r != null) return r[1];
+      return "";
+    },
+    // 查询数据字典id 
+    async getDictId(type, name) {
+      let params = {type,name}
       let { data } = await getDictId(params);
       let { value } = data;
       let res = await queryDict(value);
-      switch (params) {
+      switch (name) {
         case "plan_type_dictId": // 计划类型
           this.planTypeList = res.data;
           break;
         case "quality_record_number_dictId":  // 质量编号
           this.planForm.quality_record_number = res.data[0];
           break;
+        case "professional":  // 专业信息
+          this.majorList = Object.keys(res.data).map(x=>{
+            return x
+          });
+          break;
       }
     },
-    // 查询所有用户
+    // 查询承包商信息
+    async queryConstruction() {
+      let { data } = await queryConstructionCompany();
+      this.abbreviationLIst = data;
+    },
+    // 查询用户组件资产
     async queryAdmins() {
-      let { data } = await queryAdmin();
-      console.log("用户信息", list);
+      let params = {type: "0"}
+      let { data } = await queryAdmin(params);
+      this.users = data[0]?.users ? data[0]?.users : [];
     },
     // 查询当前用户
     async queryselestAdmins(params) {
       let { data } = await querySelsctAdmin(params);
-      this.editUser.loginName = data[0].loginName;
+      // console.log('editUser',data);
+      this.editUser.loginName = data.loginName;
+      this.editUser.office_name = data.office_name;
+      // console.log('this.editUser',this.editUser);
     },
     // 生成唯一key
     forKey(list) {
       list.forEach((x, index) => {
         x.seletKey = `00${index}`;
+        x.openKey = x.openKey ? x.openKey : false;
         if (x.tasks?.length > 0) {
           x.tasks.forEach((y, yIndex) => {
             y.seletKey = `${x.seletKey}-00${yIndex}`;
+            y.openKey = y.openKey ? y.openKey : false;
             if (y.procedures?.length > 0) {
               y.procedures.forEach((els, elsIndex) => {
                 els.seletKey = `${y.seletKey}-00${elsIndex}`;
@@ -917,6 +1039,13 @@ export default {
     handleClose(key, keyPath) {
       console.log(key, keyPath);
     },
+    // 菜单缩放
+    openTheKey(list) {
+      let openKey =  !list.openKey;
+      this.$set(list,'openKey',openKey)
+      // list.openKey = !list.openKey;
+      console.log('菜单缩放',list);
+    },
     // 点击菜单
     changeForm(item, type) {
       this.menuActive = item.seletKey;
@@ -928,18 +1057,21 @@ export default {
         this.tasksPrievw = item;
         this.tasksPrievw.status = 2;
         this.taskForm = JSON.parse(JSON.stringify(item))
-        this.taskForm.status = 2
+        this.$set(this.taskForm,'function_area',this.taskForm.function_area?this.taskForm.function_area.split(','):[])
+        this.$set(this.taskForm,'associated_devices',this.taskForm.associated_devices?this.taskForm.associated_devices.split(','):[])
+        // this.taskForm.function_area=this.taskForm.function_area?this.taskForm.function_area.split(','):''
+        // this.taskForm.associated_devices=this.taskForm.associated_devices?this.taskForm.associated_devices.split(','):''
         try {
-                this.tasksPrievw.file_list = JSON.parse(item.file || '[]')
-                this.taskForm.file = JSON.parse(item.file || '[]')
-                this.$set(this.taskForm,'file_list',JSON.parse(item.file || '[]'))
-                // this.taskForm.file_list=JSON.parse(item.file || '[]')
-              } catch (error) {
-                this.taskForm.file = []
-                this.taskForm.file_list=[]
-                this.tasksPrievw.file ='[]'
-                this.tasksPrievw.file_list=[]
-              }
+          this.tasksPrievw.file_list = JSON.parse(item.file || '[]')
+          this.taskForm.file = JSON.parse(item.file || '[]')
+          this.$set(this.taskForm,'file_list',JSON.parse(item.file || '[]'))
+          // this.taskForm.file_list=JSON.parse(item.file || '[]')
+        } catch (error) {
+          this.taskForm.file = []
+          this.taskForm.file_list=[]
+          this.tasksPrievw.file ='[]'
+          this.tasksPrievw.file_list=[]
+        }
         this.componentType = 'TaskForm'
       } else {
         switch (item.mode_type) {
@@ -958,14 +1090,22 @@ export default {
               quality_record_number: plan.quality_record_number, // 质量记录号
               mode_type: "Plan", // 类型
               estimate_amount_project_cost: plan.estimate_amount_project_cost || null, // 金额
-              tasks: plan.tasks ? plan.tasks : []
+              tasks: plan.tasks ? plan.tasks : [],
+              whether_signature: plan.whether_signature || '0',
+              person_of_signature: plan.person_of_signature || []
             }
             break;
           case "Task":
             if (item.status == 2) {
               this.componentType = "TaskForm";
               this.taskForm = JSON.parse(JSON.stringify(item))
+              this.$set(this.taskForm,'function_area',this.taskForm.function_area?this.taskForm.function_area.split(','):[])
+        this.$set(this.taskForm,'associated_devices',this.taskForm.associated_devices?this.taskForm.associated_devices.split(','):[])
               this.tasksPrievw = item;
+              if (this.keZhang == true) {
+                this.taskForm.professional = ""
+                this.taskForm.unit_of_construction = ""
+              }
               try {
                 this.tasksPrievw.file_list = JSON.parse(item.file || '[]')
                 this.taskForm.file = JSON.parse(item.file || '[]')
@@ -979,9 +1119,16 @@ export default {
             } else {
               this.componentType = "Task";
               this.tasksPrievw = item;
+              if (this.keZhang == true) {
+                this.taskForm.professional = ""
+                this.taskForm.unit_of_construction = ""
+              }
+              // this.taskForm.function_area=this.taskForm.function_area?this.taskForm.function_area.split(','):[]
+              // this.taskForm.associated_devices=this.taskForm.associated_devices?this.taskForm.associated_devices.split(','):[]
               try {
                 this.tasksPrievw.file_list = JSON.parse(item.file || '[]')
                 this.taskForm.file = JSON.parse(item.file || '[]')
+                
                 this.$set(this.taskForm,'file_list',JSON.parse(item.file || '[]'))
               } catch (error) {
                 this.taskForm.file = []
@@ -1005,6 +1152,7 @@ export default {
             this.operationPrievw = item
             this.backState.operation = false
             this.operationForm = JSON.parse(JSON.stringify(item));
+            this.queryDemoState( this.operationForm )
             break;
         }
       }
@@ -1069,6 +1217,10 @@ export default {
             this.forKey(this.plantList);
             this.remoteValue = {};
           }
+          // this.$message({
+          //       message: '保存成功',
+          //       type: 'success'
+          //     });
         } else {
           console.log('error submit!!');
           return false;
@@ -1114,7 +1266,9 @@ export default {
             quality_record_number: item.quality_record_number, // 质量记录号
             mode_type: "Plan", // 类型
             estimate_amount_project_cost: item.estimate_amount_project_cost, // 金额
-            tasks: item.tasks
+            tasks: item.tasks,
+            whether_signature: item.whether_signature || '0',
+            person_of_signature: item.person_of_signature || []
           }
           console.log('this.planForm', this.planForm);
           this.forKey([this.planForm]);
@@ -1138,9 +1292,22 @@ export default {
           break;
       }
     },
+    //解析数组
+    queryDemoState(arr){
+      if(arr?.materials?.length>0){
+        arr?.materials.forEach(x=>{
+          if( x.demand_state && typeof  x.demand_state!='object' ){
+            x.demand_state=JSON.parse(x.demand_state)
+          }
+         
+        })
+      }
+        console.log(arr,'====');
+    },
     // 任务,工序新增与删除
     handleCommand({ mod, item, index }) {
       console.log(mod, item, index);
+      if(mod===null) return
       let { mode_type } = item;
       this.clickAddType = mode_type;
       if (mod == 'add') {
@@ -1243,13 +1410,23 @@ export default {
     //物料新增
     procedureAddFn() {
       this.materialsVisible = true
-      queryMaterials().then(res => {
+      queryMaterials(this.queryParams).then(res => {
         this.dataAll = [...res.data]
+        this.currentPage=1
         this.materialsTable = this.dataAll.slice(0, this.currentPage * this.pageSize)
         this.total = this.dataAll.length
       }).catch(err => {
         this.materialsTable = []
       })
+    },
+    //重置按钮
+    restFn(){
+      this.queryParams={
+        material_code:'',
+        material_type:'',
+        material_name:'',
+      }
+      this.procedureAddFn()
     },
     //物料弹框确定按钮
     addmaterials() {
@@ -1268,6 +1445,10 @@ export default {
           onChange && onChange(JSON.stringify(this.plantList));
           this.remoteValue = {};
           this.forKey(this.plantList);
+          // this.$message({
+          //       message: '保存成功',
+          //       type: 'success'
+          //     });
         } else {
           console.log('error submit!!');
           return false;
@@ -1301,19 +1482,25 @@ export default {
     },
     //工程编辑 方法
     taskEdit(task) {
-
       this.taskForm = JSON.parse(JSON.stringify(task))
+      if (this.keZhang == true) {
+        this.taskForm.professional = ""
+        this.taskForm.unit_of_construction = ""
+      }
+      this.taskForm.function_area=this.taskForm.function_area?this.taskForm.function_area.split(','):''
+        this.taskForm.associated_devices=this.taskForm.associated_devices?this.taskForm.associated_devices.split(','):''
+        this.taskForm.status = 2
       try {
-                this.tasksPrievw.file_list = JSON.parse(task.file || '[]')
-                this.taskForm.file = JSON.parse(task.file || '[]')
-                this.$set(this.taskForm,'file_list',JSON.parse(task.file || '[]'))
-                // this.taskForm.file_list=JSON.parse(task.file || '[]')
-              } catch (error) {
-                this.taskForm.file = []
-                this.taskForm.file_list=[]
-                this.tasksPrievw.file ='[]'
-                this.tasksPrievw.file_list=[]
-              }
+        this.tasksPrievw.file_list = JSON.parse(task.file || '[]')
+        this.taskForm.file = JSON.parse(task.file || '[]')
+        this.$set(this.taskForm,'file_list',JSON.parse(task.file || '[]'))
+        // this.taskForm.file_list=JSON.parse(task.file || '[]')
+      } catch (error) {
+        this.taskForm.file = []
+        this.taskForm.file_list=[]
+        this.tasksPrievw.file ='[]'
+        this.tasksPrievw.file_list=[]
+      }
       this.taskForm.back = true
       this.componentType = 'TaskForm'
     },
@@ -1330,12 +1517,17 @@ export default {
             this.tasksPrievw[key] = this.taskForm[key]
           }
           this.tasksPrievw.status = 1
+          this.tasksPrievw.function_area=this.tasksPrievw.function_area.join(',')
+          this.tasksPrievw.associated_devices=this.tasksPrievw.associated_devices.join(',')
           // this.tasksPrievw.file = JSON.stringify(this.tasksPrievw.file)
           let { onChange } = this.customConfig;
           onChange && onChange(JSON.stringify(this.plantList));
-          console.log('TaskForm:', this.taskForm, this.tasksPrievw,this.plantList);
           this.forKey(this.plantList);
           this.remoteValue = {};
+          // this.$message({
+          //       message: '保存成功',
+          //       type: 'success'
+          //     });
         } else {
           console.log('error submit!!');
           return false;
@@ -1363,8 +1555,8 @@ export default {
     },
     //材料需求量、采购量主、采购量副更改是否为红色
     changeItemState(i, key) {
-       if(!this.operationForm.materials[i].demand_state)this.operationForm.materials[i].demand_state[key]={}
-      this.operationForm.materials[i][key] = false
+       if(!this.operationForm.materials[i].demand_state)this.operationForm.materials[i].demand_state={}
+      this.operationForm.materials[i].demand_state[key] = false
     },
     //上传
     handleFileChange(e) {
@@ -2183,6 +2375,32 @@ this.taskForm.file_list.splice(i, 1)
       }
 
     }
+  }
+}
+.select_filed{
+  margin-bottom: 10px;
+}
+/deep/.select_filed_col{
+  display: flex;
+align-items: center;
+  .el-input{
+    width: 80%;
+  }
+  .el-input__inner{
+    width: 80%;
+  }
+  .queyr_button{
+    width: 49%;
+    height: 38px;
+    color:#FFF;
+    cursor: pointer;
+    background: #0454f2;
+  border:1px solid;
+  border-radius:4px ;
+  border-color: #0454f2;
+  }
+  .rest_btn{
+    margin-left: 8px;
   }
 }
 
