@@ -529,11 +529,11 @@
       </div>
     </div>
     <!-- excel编辑 -->
-    <el-dialog class="excel-dialog" :title="title" :visible.sync="excelEditVisible" width="80%" append-to-body>
+    <el-dialog class="excel-dialog" title="" :visible.sync="excelEditVisible" width="80%" append-to-body>
       <SpreadJsEdit :plantList="plantList" v-if="excelEditVisible" />
     </el-dialog>
     <!-- excel弹窗 -->
-    <el-dialog class="excel-dialog" :title="title" :visible.sync="excelVisible" width="80%" append-to-body>
+    <el-dialog class="excel-dialog" title="" :visible.sync="excelVisible" width="80%" append-to-body>
       <SpreadJs :plantList="plantList" v-if="excelVisible" />
     </el-dialog>
     <!-- 弹窗 -->
