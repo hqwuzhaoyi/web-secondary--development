@@ -25,8 +25,8 @@
       <div class="top_Info" v-show="activeShow">
         <div style="width: 310px; color: #000" class="info-label">发电单位</div>
         <div style="width: 310px; color: #000">{{ this.excelAllData.generating_unit }}</div>
-        <div style="width: 310px; color: #000" class="info-label">电站名称</div>
-        <div style="width: 310px; color: #000">{{ this.excelAllData.power_station }}</div>
+        <div style="width: 310px; color: #000" class="info-label">发电单元名称</div>
+        <div style="width: 310px; color: #000">{{ this.excelAllData.power_cell_name }}</div>
         <div style="width: 310px; color: #000" class="info-label">结算方式</div>
         <div style="width: calc(100% - 1550px); color: #000" class="div_Right">
           {{ this.excelAllData.settlement_type }}
@@ -49,7 +49,7 @@
         <div style="width: 460px; color: #000">{{ this.excelAllData.generating_unit }}</div>
         <div style="width: 230px; color: #000" class="info-label">用电单位</div>
         <div style="width: 375px; color: #000">{{ this.excelAllData.electricity_user }}</div>
-        <div style="width: 115px; color: #000" class="info-label">电站名称</div>
+        <div style="width: 115px; color: #000" class="info-label">发电单元名称</div>
         <div style="width: calc(100% - 1430px); color: #000" class="div_Right">
           {{ this.excelAllData.power_cell_name }}
         </div>
@@ -192,7 +192,7 @@
         <span>自发自用电量明细：</span>
       </div>
       <div class="bottomTable" v-show="activeShow">
-        <el-table :data="tableData.t_monthly_electricity_bill_details" border class="bottomTable" :header-cell-style="headerCellStyle" :cell-style="cellStyle">
+        <el-table :data="tableData.t_monthly_electricity_bill_details" border class="bottomTable" :header-cell-style="headerCellStyle" :cell-style="cellStyle" :row-class-name="tableRowClassName">
           <el-table-column prop="dnbmc" label="电能表名称" width="310" />
           <el-table-column prop="bjzc_no" label="表计资产号" width="310" />
           <el-table-column prop="data_value_j" :render-header="renderHeader" label="“尖”|(kWh)" width="232.5" :formatter="data_value_jSum"></el-table-column>
@@ -1220,6 +1220,14 @@ export default {
     setValue(value) {
       this.selected = value;
     },
+
+    tableRowClassName({row}) {
+      const { dnbmc } = row;
+      if (['发电量合计', '自发自用电量'].includes(dnbmc)) {
+        return "row_blod";
+      }
+      return ''
+    }
   },
   destroyed() {
     //必需，不可删除
@@ -1436,5 +1444,8 @@ input[type="number"] {
 }
 .el-table--scrollable-x .el-table__body-wrapper {
   overflow: visible;
+}
+.row_blod{
+  font-weight: bold;
 }
 </style>
