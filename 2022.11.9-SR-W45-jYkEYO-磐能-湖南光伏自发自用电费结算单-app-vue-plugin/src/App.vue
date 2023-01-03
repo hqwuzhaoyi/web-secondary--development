@@ -192,7 +192,7 @@
         <span>自发自用电量明细：</span>
       </div>
       <div class="bottomTable" v-show="activeShow">
-        <el-table :data="tableData.t_monthly_electricity_bill_details" border class="bottomTable" :header-cell-style="headerCellStyle" :cell-style="cellStyle" :row-class-name="tableRowClassName">
+        <el-table :data="tableData.t_monthly_electricity_bill_details" border class="bottomTable" :header-cell-style="headerCellStyle" :cell-style="cellStyle">
           <el-table-column prop="dnbmc" label="电能表名称" width="310" />
           <el-table-column prop="bjzc_no" label="表计资产号" width="310" />
           <el-table-column prop="data_value_j" :render-header="renderHeader" label="“尖”|(kWh)" width="232.5" :formatter="data_value_jSum"></el-table-column>
@@ -1220,14 +1220,6 @@ export default {
     setValue(value) {
       this.selected = value;
     },
-
-    tableRowClassName({row}) {
-      const { dnbmc } = row;
-      if (['发电量合计', '自发自用电量'].includes(dnbmc)) {
-        return "row_blod";
-      }
-      return ''
-    }
   },
   destroyed() {
     //必需，不可删除
@@ -1444,8 +1436,5 @@ input[type="number"] {
 }
 .el-table--scrollable-x .el-table__body-wrapper {
   overflow: visible;
-}
-.row_blod{
-  font-weight: bold;
 }
 </style>
