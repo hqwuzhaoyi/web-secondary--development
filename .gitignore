@@ -16,11 +16,11 @@ pluginTemp/js/*
 **/pluginTemp/js/*.js
 pluginTemp/libs/*
 plugin-*.zip
-
-dumi
-
 .history
+temp
+
 # Editor directories and files
+.umi
 .idea
 .vscode
 *.suo
