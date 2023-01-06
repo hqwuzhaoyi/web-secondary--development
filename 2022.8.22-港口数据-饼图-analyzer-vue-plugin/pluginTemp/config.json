@@ -1,0 +1,30 @@
+{
+  "id": "9ee0fc78-a586-4c42-b418-92d2491b696b",
+  "type": "analyzers",
+  "main": "app.6af11ead.js",
+  "version": "2",
+  "props": {
+    "img": "custom_table.png",
+    "type": "k23dasd547",
+    "disableimg": "disabled_custom_table.png",
+    "name": "vue实现测试",
+    "domId": "ex_custom_table_15",
+    "lib": [],
+    "cssDep": [],
+    "scriptName": "app.a515a2e6.js",
+    "optionModules": [],
+    "vars": [
+      "系列颜色",
+      "图例名称颜色",
+      "图例名称大小",
+      "图例名称字体",
+      "图例数值颜色",
+      "图例数值大小",
+      "饼图左距离",
+      "饼图顶距离",
+      "饼图缩放倍率",
+      "图例右距离",
+      "图例顶距离"
+    ]
+  }
+}

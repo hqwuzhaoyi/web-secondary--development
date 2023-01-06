@@ -1,0 +1,25 @@
+{
+  "id": "0b1690a3-5e57-4b65-ab7f-c01c9972d78f",
+  "type": "app",
+  "main": "app.f0ef374a.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "assetId",
+      "speedTime",
+      "imgField",
+      "sidebar",
+      "pictureTile",
+      "titleField",
+      "detailsUrl",
+      "keyField",
+      "height"
+    ]
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "id": "01cd35b6-eb5d-4d01-98df-ac3ce74aa7b3",
+  "type": "app",
+  "main": "app.f08847f9.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "title",
+      "buttonTitle",
+      "tableDisplayFieldName",
+      "assetId",
+      "inputSelectConfig",
+      "sortConfig",
+      "sortType"
+    ]
+  }
+}

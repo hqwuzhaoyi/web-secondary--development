@@ -1,0 +1,15 @@
+{
+  "id": "339a637d-e51a-4502-ace1-96123f5e8346",
+  "type": "app",
+  "main": "app.caad8182.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": []
+  }
+}

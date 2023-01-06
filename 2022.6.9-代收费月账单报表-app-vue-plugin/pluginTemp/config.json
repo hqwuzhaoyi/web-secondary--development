@@ -1,0 +1,15 @@
+{
+  "id": "14fdb376-a8a0-4a7d-b79d-fd42d375a371",
+  "type": "app",
+  "main": "app.adc23bf8.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": []
+  }
+}

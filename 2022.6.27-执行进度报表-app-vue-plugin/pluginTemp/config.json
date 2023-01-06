@@ -1,0 +1,13 @@
+{
+  "code": "97dffe29-22f6-4ec3-95e0-6e2a439cb081",
+  "type": "customize",
+  "img": "APP_0001.png",
+  "name": "productiMission",
+  "lib": [],
+  "css_script": [],
+  "js_script": "app.5ca8dcde.js",
+  "loadStyle": 0,
+  "customconf": [],
+  "main": "app.5ca8dcde.js",
+  "id": "93673f74-4302-4ca8-8a63-5a07dd4ffcf3"
+}

@@ -1,0 +1,30 @@
+{
+  "id": "794976f8-cae3-4847-8933-e5815fa77479",
+  "type": "analyzers",
+  "main": "app.9685b95d.js",
+  "version": "2",
+  "props": {
+    "img": "custom_table.png",
+    "type": "k23dasd547",
+    "disableimg": "disabled_custom_table.png",
+    "name": "vue实现测试",
+    "domId": "ex_custom_table_15",
+    "lib": [],
+    "cssDep": [],
+    "scriptName": "app.a515a2e6.js",
+    "optionModules": [],
+    "vars": [
+      "坐标字号",
+      "坐标字体",
+      "坐标字体颜色",
+      "柱子宽度",
+      "颜色配置",
+      "x坐标轴颜色",
+      "y坐标轴颜色",
+      "y坐标轴文本颜色",
+      "y坐标轴字体大小",
+      "y坐标轴字体类型",
+      "y坐标轴分割线颜色"
+    ]
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "id": "6f1fd01e-cd05-45a9-af23-869f0d405e9d",
+  "type": "app",
+  "main": "app.6637a901.js",
+  "version": "2",
+  "baseVersion": "V8R4C50SPC210_RYKJ_v01",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": []
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "id": "19e9636b-9420-40a0-8416-ea80f0ca50a4",
+  "type": "bigscreen",
+  "main": "app.ce87ee61.js",
+  "version": "2",
+  "props": {
+    "img": "APP_0001.png",
+    "disableimg": "disabled_custom_table.png",
+    "name": "Vue版本的演示Demo",
+    "className": "className-demo"
+  }
+}

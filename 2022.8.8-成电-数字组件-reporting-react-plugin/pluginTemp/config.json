@@ -1,0 +1,12 @@
+{
+  "id": "ede5a7d5-7788-4b58-b80a-83214b8aa016",
+  "type": "reporting",
+  "main": "main.fd5e517d.js",
+  "version": "2",
+  "props": {
+    "styleArr": "[\"title\",\"height\",\"key\", \"eventCenterConfig\"]",
+    "columnStyle": "{title:'数字'}",
+    "componentAttributes": "{\"style\":[\"title\",\"height\"],\"data\":[\"key\"],\"interaction\":[\"eventCenterConfig\"]}",
+    "assetColumnList": "[{\"col_name\":\"自定义\",\"col_datatype\":8}]"
+  }
+}

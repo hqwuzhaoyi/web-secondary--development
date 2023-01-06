@@ -1,0 +1,43 @@
+{
+  "id": "633508d2-b09f-4ac5-a377-185cc4560b61",
+  "type": "analyzer",
+  "main": "main.0cc4f0cd.js",
+  "version": "2",
+  "props": {
+    "img": "custom_table.png",
+    "type": "qoiwud23fo3",
+    "disableimg": "disabled_custom_table.png",
+    "name": "demo",
+    "process": true,
+    "domId": "ex_46fbe360-daa5-42af-8ca0-2ec3066ef216",
+    "lib": [],
+    "cssDep": [],
+    "scriptName": "main.b42fe2f5.js",
+    "vars": [
+      "高度",
+      "宽度",
+      "背景颜色",
+      "柱状颜色渐变",
+      "图例图标颜色",
+      "图例图标宽度",
+      "图例图标高度",
+      "图例文字颜色",
+      "图例文字字号",
+      "图例整体位置",
+      "X轴分割线颜色",
+      "X轴文字颜色",
+      "X轴文字字号",
+      "Y轴线颜色",
+      "Y轴线宽度",
+      "Y轴文字颜色",
+      "Y轴文字字号",
+      "数据柱宽度",
+      "数据柱背景宽度",
+      "数据柱背景颜色",
+      "数据柱末尾块宽度",
+      "数据柱末尾块高度",
+      "数据柱末尾块颜色"
+    ],
+    "optionModules": []
+  }
+}

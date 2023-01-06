@@ -1,0 +1,24 @@
+{
+  "id": "a2f87f76-160d-4cca-bda8-31dc8d1d6dea",
+  "type": "bigscreen",
+  "main": "app.2d4b2b3b.js",
+  "version": "2",
+  "props": {
+    "img": "APP_0001.png",
+    "disableimg": "disabled_custom_table.png",
+    "name": "Vue版本的演示Demo",
+    "className": "className-demo",
+    "vars": [
+      "tip图标颜色",
+      "tip图标大小",
+      "tip标题",
+      "tip标题文字颜色",
+      "tip标题文字大小",
+      "tip内容",
+      "tip内容背景颜色",
+      "tip内容宽度",
+      "tip内容文字大小",
+      "tip内容文字颜色"
+    ]
+  }
+}

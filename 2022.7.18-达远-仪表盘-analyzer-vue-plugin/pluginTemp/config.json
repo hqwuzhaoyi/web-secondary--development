@@ -1,0 +1,28 @@
+{
+  "id": "405f38a5-76a8-4255-94eb-72335ed07829",
+  "type": "analyzer",
+  "main": "main.69266bc1.js",
+  "baseVersion": "V8R4C50SPC210",
+  "version": "2",
+  "props": {
+    "img": "custom_table.png",
+    "type": "qoiwud23fo3",
+    "disableimg": "disabled_custom_table.png",
+    "name": "demo",
+    "process": true,
+    "domId": "ex_46fbe360-daa5-42af-8ca0-2ec3066ef216",
+    "lib": [],
+    "cssDep": [],
+    "scriptName": "main.b42fe2f5.js",
+    "vars": [
+      "区间一",
+      "区间二",
+      "区间三",
+      "区间最大值",
+      "仪表盘标题",
+      "仪表盘标题位置",
+      "仪表盘数值"
+    ],
+    "optionModules": []
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "id": "a4576091-9287-4a58-9e6b-c217d7f276c9",
+  "type": "analyzer",
+  "main": "main.88a9475e.js",
+  "version": "2",
+  "props": {
+    "img": "custom_table.png",
+    "type": "qoiwud23fo3",
+    "disableimg": "disabled_custom_table.png",
+    "name": "demo",
+    "process": true,
+    "domId": "ex_46fbe360-daa5-42af-8ca0-2ec3066ef216",
+    "lib": [],
+    "cssDep": [],
+    "scriptName": "main.88a9475e.js",
+    "vars": [
+      "barColor",
+      "lineColor",
+      "markTextSize",
+      "markPosition",
+      "markingText",
+      "titleText",
+      "titlePosition",
+      "xFontSize",
+      "xFontFamily",
+      "FontSize",
+      "FontFamily"
+    ],
+    "optionModules": []
+  }
+}

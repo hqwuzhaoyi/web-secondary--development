@@ -1,0 +1,24 @@
+{
+  "id": "32d204f1-7579-4866-918a-1276f87e95a5",
+  "type": "app",
+  "main": "app.4d322ac4.js",
+  "version": "2",
+  "baseVersion": "V8R4C50SPC210_DM_0615",
+  "props": {
+    "type": "login",
+    "img": "custom_table.png",
+    "disableimg": "disabled_custom_table.png",
+    "name": "应用二开_vue",
+    "domId": "ex_custom_table_15",
+    "lib": [],
+    "cssDep": [],
+    "scriptName": "app.068ef0e1.js",
+    "optionModules": [],
+    "customConfig": [
+      "title",
+      "url",
+      "desc",
+      "imgUrl"
+    ]
+  }
+}

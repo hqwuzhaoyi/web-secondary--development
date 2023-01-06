@@ -1,0 +1,16 @@
+{
+  "code": "0cd078db-ebbf-4832-be01-0e289be3616b",
+  "type": "customize",
+  "img": "APP_0001.png",
+  "name": "app-plugin_17",
+  "lib": [],
+  "css_script": [],
+  "js_script": "main.c2913937.js",
+  "loadStyle": 0,
+  "customconf": [
+    "title",
+    "url",
+    "desc",
+    "imgUrl"
+  ]
+}

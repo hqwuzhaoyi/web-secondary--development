@@ -1,0 +1,18 @@
+{
+  "id": "fbd55997-1a83-4c78-912d-88ac96e3dbe4",
+  "type": "app",
+  "main": "app.3c0d0e8f.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "报表ID",
+      "表格查询时间类型"
+    ]
+  }
+}

@@ -1,0 +1,88 @@
+.filterToolbarHeader {
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  height: 30px;
+
+  .filterToolbarContentRight {
+    position: absolute;
+    top: 0;
+    right: 20px;
+    cursor: pointer;
+    user-select: none;
+
+    .anticon.anticon-filter {
+      font-size: 28px;
+      color: #1f67f3;
+    }
+  }
+}
+
+.filterToolbarContent {
+  user-select: none;
+  position: relative;
+
+  .filterToolbarContentLeft {
+    width: calc(100% - 300px);
+    border-right: 1px solid black;
+    display: inline-block;
+
+    .filter-row {
+      .filter-label {
+      }
+
+      .ant-radio-group {
+        .ant-radio-button-wrapper {
+          &::before {
+            width: 0px;
+          }
+
+          &:hover, &.ant-radio-button-wrapper-checked {
+            border: 1px solid #1f67f3;
+            background-color: #1f67f3;
+
+            span {
+              color: #fff !important;
+            }
+          }
+
+          padding: 0;
+
+          span {
+            color: #555555;
+
+            &:not(.ant-radio-button-inner) {
+              width: 100%;
+              display: block;
+              text-align: center;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .filterToolbarContentRight {
+    right: 20px;
+    top: 0;
+    position: absolute;
+    margin-top: 43px;
+
+    .ant-input-search {
+      height: 32px;
+      .ant-btn {
+        background: #1f67f3;
+        border-radius: 10px !important;
+        color: white !important;
+        width: 75px;
+      }
+
+      .ant-input {
+        &:hover, &:focus {
+          border-color: #1f67f3
+        }
+      }
+    }
+  }
+
+}

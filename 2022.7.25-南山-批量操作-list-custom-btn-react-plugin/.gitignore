@@ -1,0 +1,25 @@
+# dependencies
+node_modules
+/.pnp
+.pnp.js
+# production
+docs-dist
+es
+lib
+
+# misc
+pluginTemp/js/*
+pluginTemp/libs/*
+plugin-*.zip
+
+/dumi/.umi/.cache/babel-loader
+
+.history
+# Editor directories and files
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

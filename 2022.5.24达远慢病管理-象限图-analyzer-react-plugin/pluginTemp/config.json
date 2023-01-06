@@ -1,0 +1,33 @@
+{
+  "id": "88594497-448e-4d43-84f2-36e55379f994",
+  "type": "analyzer",
+<<<<<<< HEAD
+  "main": "main.06479125.js",
+=======
+  "main": "main.b9244644.js",
+>>>>>>> 6da83ecb334dd41d3f8d6b0d93c21f182167982b
+  "version": "2",
+  "props": {
+    "img": "custom_table.png",
+    "type": "qoiwud23fo3",
+    "disableimg": "disabled_custom_table.png",
+    "name": "demo",
+    "process": true,
+    "domId": "ex_46fbe360-daa5-42af-8ca0-2ec3066ef216",
+    "lib": [],
+    "cssDep": [],
+    "scriptName": "main.b42fe2f5.js",
+    "vars": [
+      "colorConfig",
+      "sectorName",
+      "sectorColor",
+      "centerColor",
+      "yMax",
+      "yMin",
+      "titleText",
+      "titleColor",
+      "titleSize"
+    ],
+    "optionModules": []
+  }
+}

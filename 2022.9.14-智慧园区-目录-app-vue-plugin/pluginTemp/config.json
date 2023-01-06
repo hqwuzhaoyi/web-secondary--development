@@ -1,0 +1,27 @@
+{
+  "id": "20b79d76-37df-4221-8a1b-409ff9baa306",
+  "type": "app",
+  "main": "app.fffadfc0.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "assetId",
+      "show_name",
+      "multi_storey",
+      "father_node",
+      "iframe_URL",
+      "unit_height",
+      "multiple_choice",
+      "data_filed",
+      "icon_URL",
+      "title",
+      "permissions_flag"
+    ]
+  }
+}

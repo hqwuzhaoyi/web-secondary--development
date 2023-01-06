@@ -1,0 +1,29 @@
+{
+  "id": "653fef8c-762b-408e-b1bf-8f832e05ff25",
+  "type": "app",
+  "main": "app.647699d0.js",
+  "baseVersion": "V8R4C10_PNDL_v01",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "oneAssetId",
+      "oneListId",
+      "twoAssetId",
+      "twoListId",
+      "threeAssetId",
+      "threeListId",
+      "fourAssetId",
+      "fourListId",
+      "fiveAssetId",
+      "fiveListId",
+      "rootDataId",
+      "rootListId"
+    ]
+  }
+}

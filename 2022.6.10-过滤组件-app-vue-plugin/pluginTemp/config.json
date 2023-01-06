@@ -1,0 +1,18 @@
+{
+  "id": "b3567a88-aa57-4a86-ba80-823cf357af90",
+  "type": "app",
+  "main": "app.ee9077e2.js",
+  "version": "2",
+  "baseVersion": "V8R4C50SPC210_DMXT_0614",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "chooseList"
+    ]
+  }
+}

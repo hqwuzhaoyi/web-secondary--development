@@ -1,0 +1,19 @@
+{
+  "id": "cbb58f91-d070-47b0-ab20-5f8e64051b80",
+  "type": "app",
+  "main": "app.abea7882.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "assetId",
+      "显示字段",
+      "存储字段"
+    ]
+  }
+}
