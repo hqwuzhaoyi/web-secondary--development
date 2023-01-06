@@ -35,7 +35,7 @@
         class="inputSelectBac" value-key="value" style="width: 120px">
         <el-option v-for="item in levelOption" :key="item.value" :label="item.label" :value="item"> </el-option>
       </el-select>
-      <span class="selectSpan">计划日期</span>
+      <span class="selectSpan">巡检日期</span>
       <el-date-picker v-model="searchDate" popper-class="inputSelectBacPoper" type="daterange" class="inputSelectBac"
         style="width: 210px" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
         value-format="yyyy-MM-dd" size="small">
@@ -43,18 +43,26 @@
       <el-button plain class="searchReload" @click="searchTable">查询</el-button>
       <el-button plain class="searchReload" @click="reloadSearch">重置</el-button>
     </div>
-    <el-table :data="tableData" stripe
+    <el-table :data="tableData" stripe max-height="600px"
       :header-cell-style="{ color: '#fff', background: 'linear-gradient(0deg, #235B80 0%, #27536F 100%)', fontSize: '12px', border: 'unset' }"
       style="width: 100%; margin-top: 16px; margin-bottom: 10px">
       <el-table-column type="index" width="50" label="序号"> </el-table-column>
       <el-table-column prop="province_name" label="所在省份" width="130"> </el-table-column>
       <el-table-column prop="city_name" label="所在市区" width="130"> </el-table-column>
       <el-table-column prop="substation_level" label="重点目标等级" width="140" :formatter="levelFn"> </el-table-column>
-      <el-table-column prop="substation_name" label="站点名称"> </el-table-column>
+      <el-table-column prop="substation_name" label="站点名称">
+
+        <template slot-scope="scope">
+          <el-tooltip class="item" effect="dark" :content="scope.row.substation_name" placement="top">
+            <div class="tooltip_table">{{ scope.row.substation_name }}</div>
+          </el-tooltip>
+        </template>
+
+      </el-table-column>
       <el-table-column prop="total" label="任务执行次数" width="170"> </el-table-column>
       <el-table-column prop="findFlawNum" label="发现缺陷次数" width="170"> </el-table-column>
       <el-table-column prop="flawNum" label="缺陷数量" width="170"> </el-table-column>
-      <el-table-column prop="probability" label="发现缺陷占比率" width="230"> </el-table-column>
+      <el-table-column prop="probability" label="发现缺陷占比率(%)" width="230"> </el-table-column>
     </el-table>
     <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :current-page="pageNo"
       :page-sizes="[5, 10, 20, 50]" :page-size="pageSize" background popper-class="inputSelectBacPoper"
@@ -67,7 +75,7 @@
 import MsgCompConfig from "./msgCompConfig.js";
 import Utils from "@/utils/index.js";
 import { queryDropDownBox, stationFlawStatistics } from "../../api/asset";
-import { RadioButton, RadioGroup, Table, TableColumn, Pagination, Input, DatePicker, Select, Option } from "element-ui";
+import { RadioButton, Tooltip, RadioGroup, Table, TableColumn, Pagination, Input, DatePicker, Select, Option } from "element-ui";
 import Vue from "vue";
 import "./index.css";
 Vue.use(RadioGroup);
@@ -79,6 +87,7 @@ Vue.use(Input);
 Vue.use(DatePicker);
 Vue.use(Select);
 Vue.use(Option);
+Vue.use(Tooltip);
 export default {
   name: "Main",
   components: {},
@@ -94,15 +103,15 @@ export default {
       levelOption: [
         {
           value: "1",
-          label: "1级",
+          label: "一级",
         },
         {
           value: "2",
-          label: "2级",
+          label: "二级",
         },
         {
           value: "3",
-          label: "3级",
+          label: "三级",
         },
 
       ],
@@ -134,42 +143,44 @@ export default {
       handler(val) {
 
         if (this.provinceData.length == 0) return
-        if (val == '' || val == undefined || val.province_name == undefined) return
-        this.citySelect = {};
-        this.cityOption = [];
-        this.stationSelect = {};
-        this.stationOption = [];
+        if (!(Boolean(this.province) == false && Boolean(this.city) == false && Boolean(this.substationName) == false)) {
+          this.citySelect = {};
+          this.cityOption = [];
+          this.stationSelect = {};
+          this.stationOption = [];
 
-        this.cityData.forEach((item, index) => {
-          if (item.province_name == val?.province_name) {
-            this.cityOption.push(item);
-          }
-        });
-        this.stationData.forEach((item, index) => {
-          if (item.province_name == val?.province_name) {
-            this.stationOption.push(item);
-          }
-        });
+          this.cityData.forEach((item, index) => {
+            if (item.province_name == val?.province_name) {
+              this.cityOption.push(item);
+            }
+          });
+          this.stationData.forEach((item, index) => {
+            if (item.province_name == val?.province_name) {
+              this.stationOption.push(item);
+            }
+          });
+        }
+
 
         if (!this.city && !this.substationName && this.province) this.searchTable()
       },
 
-      // immediate: true,
       deep: true
     },
     'citySelect': {
       handler(val) {
+        if (!(Boolean(this.province) == false && Boolean(this.city) == false && Boolean(this.substationName) == false)) {
+          this.stationSelect = {};
+          this.stationOption = [];
 
-        if (!this.provinceData.length == 0) return
-        if (val == '' || val == undefined || val.city_name == undefined) return
-        this.stationSelect = {};
-        this.stationOption = [];
+          this.stationData.forEach((item, index) => {
+            if (item.city_name == val?.city_name) {
+              this.stationOption.push(item);
+            }
+          });
+        }
 
-        this.stationData.forEach((item, index) => {
-          if (item.city_name == val?.city_name) {
-            this.stationOption.push(item);
-          }
-        });
+
         if (this.city && !this.substationName) this.searchTable()
       },
 
@@ -260,6 +271,7 @@ export default {
         this.stationSelect = substationOp
         this.provinceSelect = provinceOp
         this.citySelect = cityOp
+        if (data?.variable?.current_value === '' || data?.variable?.default_value === '') this.searchTable()
       });
     window.componentCenter?.register && window.componentCenter.register(this.componentId, "comp", this, MsgCompConfig);
     this.updateProcess && this.updateProcess();
@@ -267,6 +279,13 @@ export default {
     this.id = id ? `secondary_analyzer_${id}` : `secondary_bigscreen_${Utils.generateUUID()}`;
   },
   methods: {
+
+    oneFixed(row, column, cellValue, index) {
+
+
+      // console.log(row, column, cellValue, '=============ds');
+      return row.total == 0 ? '--' : Number(cellValue).toFixed(2) + '%'
+    },
     //去重
     removeDuplicateObj(arr, key) {
       let obj = {};
@@ -342,7 +361,7 @@ export default {
       stationFlawStatistics(message).then((res) => {
         this.tableData = res.data.data;
         this.tableData.forEach((item, index) => {
-          item.probability = item.probability + "%";
+          item.probability = item.total == 0 ? '--' : Number(item.probability).toFixed(2)
         });
         this.total = res.data.total;
       });
@@ -350,6 +369,7 @@ export default {
     tableToExcel(tableData) {
       const headArr = Object.keys(tableData[0]); // 要导出的json数据 // 列标题
       let str = "<tr>";
+      const levelTemp = ['一级', '二级', '三级']
       headArr[0] = "province_name";
       headArr[1] = "city_name";
       headArr[2] = "substation_level";
@@ -382,7 +402,7 @@ export default {
             item = "缺陷数量";
             break;
           case "probability":
-            item = "发现缺陷占比率";
+            item = "发现缺陷占比率(%)";
             break;
         }
         str += index == headArr.length - 1 ? `<td>${item}</td></tr>` : `<td>${item}</td>`;
@@ -391,21 +411,27 @@ export default {
         str += "<tr>";
         for (const key of headArr) {
           // 增加\t为了不让表格显示科学计数法或者其他格式
-          str += `<td>${tableData[i][key] + "\t"}</td>`;
+          if (key == 'substation_level') {
+            str += `<td>${levelTemp[tableData[i][key] - 1] + "\t"}</td>`;
+          } else {
+            str += `<td>${tableData[i][key] + "\t"}</td>`;
+          }
         }
         str += "</tr>";
       } // Worksheet名
       const worksheet = "Sheet1";
       const uri = "data:application/vnd.ms-excel;base64,"; // 下载的表格模板数据
 
-      const template = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
-    xmlns:x="urn:schemas-microsoft-com:office:excel"
-    xmlns="http://www.w3.org/TR/REC-html40">
-    <head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
-    <x:Name>${worksheet}</x:Name>
-    <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
-    </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-    </head><body><table>${str}</table></body></html>`; // 下载模板 // 输出base64编码
+      const template = `<html
+             xmlns:o="urn:schemas-microsoft-com:office:office" 
+             xmlns:x="urn:schemas-microsoft-com:office:excel"
+        xmlns="http://www.w3.org/TR/REC-html40">
+      <head> <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+          <x:Name>${worksheet}</x:Name>
+          <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+          </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--> </head>
+    <body><table style="vnd.ms-excel.numberformat:@" >${str}</table></body>
+      </html>`;// 下载模板 // 输出base64编码
       const base64 = function (s) {
         return window.btoa(unescape(encodeURIComponent(s)));
       };
@@ -557,6 +583,14 @@ export default {
   color: #fff !important;
   padding: 0px !important;
   width: 10% !important;
+}
+
+.tooltip_table {
+  overflow: hidden;
+
+  white-space: nowrap;
+
+  text-overflow: ellipsis;
 }
 
 /deep/.el-table th.el-table__cell.is-leaf,
@@ -722,9 +756,61 @@ export default {
 }
 </style>
 <style>
+/* .inputSelectBacPoper .el-select-dropdown__list,
+.inputSelectBacPoper .el-picker-panel__content {
+  background: linear-gradient(180deg, rgba(8, 57, 87, 0.9) 0%, rgba(9, 24, 39, 0.9) 100%) !important;
+}
+
+.inputSelectBacPoper .el-picker-panel {
+  border: 0px;
+}
+
+.inputSelectBacPoper {
+  border: 1px solid rgba(21, 154, 255, 0.7) !important;
+}
+
+.inputSelectBacPoper .available {
+  color: #99afcc;
+}
+
+.inputSelectBacPoper .popper__arrow::after,
+.inputSelectBacPoper .popper__arrow {
+  border-bottom-color: rgba(21, 154, 255, 0.7) !important;
+}
+
+.inputSelectBacPoper .in-range div {
+  background: rgb(51, 125, 150) !important;
+}
+
+.inputSelectBacPoper .el-select-dropdown__item.hover,
+.inputSelectBacPoper .el-select-dropdown__item:hover {
+  background: linear-gradient(270deg, rgba(91, 222, 218, 0.3) -7.2%, rgba(23, 82, 101, 0.5) 100%);
+  color: #d0deee;
+} */
+
+
 .inputSelectBacPoper {
   background: linear-gradient(180deg, rgba(8, 57, 87, 0.9) 0%, rgba(9, 24, 39, 0.9) 100%) !important;
-  border: 1px solid rgba(21, 154, 255, 0.7) !important
+  border: 1px solid rgba(21, 154, 255, 0.7) !important;
+  color: #fff !important;
+
+}
+
+.inputSelectBacPoper .in-range div {
+  background: linear-gradient(rgba(20, 143, 255, 0.3) 25.38%, rgba(21, 246, 238, 0.5) 94.06%)
+}
+
+.inputSelectBacPoper .el-date-table td.end-date span {
+  background-color: none !important;
+}
+
+.inputSelectBacPoper .el-date-table td.start-date span {
+  background-color: none !important;
+}
+
+
+.inputSelectBacPoper .el-picker-panel__icon-btn {
+  color: #fff;
 }
 
 .inputSelectBacPoper.el-popper[x-placement^=bottom] .popper__arrow {

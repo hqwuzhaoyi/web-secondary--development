@@ -1,0 +1,21 @@
+{
+  "id": "7888ce53-f8ad-4e13-8c15-7d235381cae9",
+  "type": "app",
+  "main": "app.3d8314d8.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "id",
+      "type"
+    ]
+  },
+  "configuration": true,
+  "requirement-number": "SR-W51-0oZfK1",
+  "requirement-name": "新增对比分析"
+}

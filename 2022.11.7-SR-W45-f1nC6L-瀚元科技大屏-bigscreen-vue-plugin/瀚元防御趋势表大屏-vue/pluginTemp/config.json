@@ -1,8 +1,10 @@
 {
-  "id": "1f7a31b5-6ac0-4ba7-995f-4188ea2af70f",
+  "id": "de9acb8c-0def-4ffc-866d-a92b0420838f",
   "type": "bigscreen",
-  "main": "app.e35dbff6.js",
+  "main": "app.9df423bf.js",
   "version": "2",
+  "requirement-number": "",
+  "requirement-name": "防御趋势",
   "props": {
     "img": "APP_0001.png",
     "disableimg": "disabled_custom_table.png",

@@ -13,13 +13,13 @@
          :visible.sync="tableDialogVisible"
          :append-to-body="true"
          custom-class="table_dialog"
-         width="70%"
+         width="85%"
          :show-close="false"
          :close-on-press-escape="false"
          :close-on-click-modal="false"
       >
          <!-- 表格 -->
-         <el-table :data="tableDialogData" ref="multipleTable" :row-class-name="tableRowClassName" height="405px" row-key="data_id" @selection-change="selectTabel">
+         <el-table :data="tableDialogData" ref="multipleTable" :row-class-name="tableRowClassName" height="405px" :row-key="saveField" @selection-change="selectTabel">
             <el-table-column type="selection" width="55" align="center" reserve-selection></el-table-column>
             <el-table-column type="index" label="序号" width="55" align="center"></el-table-column>
             <el-table-column property="substation_no" label="站点编号" align="center" show-overflow-tooltip></el-table-column>
@@ -60,7 +60,7 @@
 
 <script>
 import eventActionDefine from "./msgCompConfig";
-import { queryAssetById } from "../api/asset";
+import { getAssetData } from "../api/asset";
 
 export default {
    name: "Add",
@@ -122,7 +122,7 @@ export default {
       } else {
          this.assetId = "ea7c9900-0652-a5a0-2f11-194074ec2957";
          this.showField = "substation_name";
-         this.saveField = "data_id";
+         this.saveField = "substation_no";
       }
    },
 
@@ -164,10 +164,9 @@ export default {
 
       // 获取表格数据
       getTableData() {
-         queryAssetById(this.assetId, this.page, this.pageSize).then((res) => {
-            let resData = this.translatePlatformDataToJsonArray(res);
-            this.tableDialogData = resData;
-            this.pageTotal = res.data[2];
+         getAssetData(this.assetId, this.page, this.pageSize).then((res) => {
+            this.tableDialogData = res.data.data;
+            this.pageTotal = res.data.count;
 
             this.$nextTick(() => {
                if (this.interfaceData.length) {
@@ -210,6 +209,11 @@ export default {
 
       // 保存选中的值
       saveTableSelect() {
+         this.$refs["ruleForm"].validate((valid) => {
+            if (!valid) {
+               return false;
+            }
+         });
          let showStr = [];
          let saveArr = [];
 
@@ -237,10 +241,14 @@ export default {
          return { value };
       },
 
-      // do_EventCenter_ruleFormData() {
-      //    let value = this.interfaceData.split("");
-      //    return { value };
-      // },
+      // 校验动作
+      do_EventCenter_ruleFormData() {
+         this.$refs["ruleForm"].validate((valid) => {
+            if (!valid) {
+               return false;
+            }
+         });
+      },
 
       Event_Center_getName() {
          return "瀚元科技-弹窗选择列表";
@@ -276,6 +284,10 @@ export default {
       height: 177px;
       line-height: 177px;
       padding: 0;
+   }
+
+   .el-form-item__error {
+      margin-top: -62px;
    }
 }
 

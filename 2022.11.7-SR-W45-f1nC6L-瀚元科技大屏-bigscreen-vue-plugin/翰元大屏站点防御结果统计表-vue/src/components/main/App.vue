@@ -35,7 +35,7 @@
         class="inputSelectBac" value-key="value" style="width: 120px">
         <el-option v-for="item in levelOption" :key="item.value" :label="item.label" :value="item"> </el-option>
       </el-select>
-      <span class="selectSpan">计划日期</span>
+      <span class="selectSpan">防御日期</span>
       <el-date-picker v-model="searchDate" popper-class="inputSelectBacPoper" type="daterange" class="inputSelectBac"
         style="width: 210px" range-separator="至" start-placeholder="开始日期" end-placeholder="结束日期"
         value-format="yyyy-MM-dd" size="small">
@@ -43,7 +43,7 @@
       <el-button plain class="searchReload" @click="searchTable">查询</el-button>
       <el-button plain class="searchReload" @click="reloadSearch">重置</el-button>
     </div>
-    <el-table :data="tableData" stripe
+    <el-table :data="tableData" stripe max-height="600px"
       :header-cell-style="{ color: '#fff', background: 'linear-gradient(0deg, #235B80 0%, #27536F 100%)', fontSize: '12px', border: 'unset' }"
       style="width: 100%; margin-top: 16px; margin-bottom: 10px">
       <el-table-column type="index" width="50" label="序号"> </el-table-column>
@@ -54,7 +54,7 @@
       <el-table-column prop="total" label="防御总次数" width="100"> </el-table-column>
       <el-table-column prop="successNum" label="防御成功次数" width="100"> </el-table-column>
       <el-table-column prop="failedNum" label="防御失败次数" width="100"> </el-table-column>
-      <el-table-column prop="probability" label="防御成功率" width="110"> </el-table-column>
+      <el-table-column prop="probability" label="防御成功率(%)" width="110"> </el-table-column>
       <el-table-column prop="firstAlarm" label="首次发生时间" width="160"> </el-table-column>
       <el-table-column prop="lastAlarm" label="最后发生时间" width="160"> </el-table-column>
     </el-table>
@@ -97,15 +97,15 @@ export default {
       levelOption: [
         {
           value: "1",
-          label: "1级",
+          label: "一级",
         },
         {
           value: "2",
-          label: "2级",
+          label: "二级",
         },
         {
           value: "3",
-          label: "3级",
+          label: "三级",
         },
 
       ],
@@ -136,42 +136,44 @@ export default {
       handler(val) {
 
         if (this.provinceData.length == 0) return
-        if (val == '' || val == undefined || val.province_name == undefined) return
-        this.citySelect = {};
-        this.cityOption = [];
-        this.stationSelect = {};
-        this.stationOption = [];
+        if (!(Boolean(this.province) == false && Boolean(this.city) == false && Boolean(this.substationName) == false)) {
+          this.citySelect = {};
+          this.cityOption = [];
+          this.stationSelect = {};
+          this.stationOption = [];
 
-        this.cityData.forEach((item, index) => {
-          if (item.province_name == val?.province_name) {
-            this.cityOption.push(item);
-          }
-        });
-        this.stationData.forEach((item, index) => {
-          if (item.province_name == val?.province_name) {
-            this.stationOption.push(item);
-          }
-        });
+          this.cityData.forEach((item, index) => {
+            if (item.province_name == val?.province_name) {
+              this.cityOption.push(item);
+            }
+          });
+          this.stationData.forEach((item, index) => {
+            if (item.province_name == val?.province_name) {
+              this.stationOption.push(item);
+            }
+          });
+        }
+
 
         if (!this.city && !this.substationName && this.province) this.searchTable()
       },
 
-      // immediate: true,
       deep: true
     },
     'citySelect': {
       handler(val) {
+        if (!(Boolean(this.province) == false && Boolean(this.city) == false && Boolean(this.substationName) == false)) {
+          this.stationSelect = {};
+          this.stationOption = [];
 
-        if (!this.provinceData.length == 0) return
-        if (val == '' || val == undefined || val.city_name == undefined) return
-        this.stationSelect = {};
-        this.stationOption = [];
+          this.stationData.forEach((item, index) => {
+            if (item.city_name == val?.city_name) {
+              this.stationOption.push(item);
+            }
+          });
+        }
 
-        this.stationData.forEach((item, index) => {
-          if (item.city_name == val?.city_name) {
-            this.stationOption.push(item);
-          }
-        });
+
         if (this.city && !this.substationName) this.searchTable()
       },
 
@@ -264,6 +266,7 @@ export default {
         this.stationSelect = substationOp
         this.provinceSelect = provinceOp
         this.citySelect = cityOp
+        if (data?.variable?.current_value === '' || data?.variable?.default_value === '') this.searchTable()
       });
     window.componentCenter?.register && window.componentCenter.register(this.componentId, "comp", this, MsgCompConfig);
     this.updateProcess && this.updateProcess();
@@ -271,6 +274,14 @@ export default {
     this.id = id ? `secondary_analyzer_${id}` : `secondary_bigscreen_${Utils.generateUUID()}`;
   },
   methods: {
+
+    oneFixed(row, column, cellValue, index) {
+
+      let colName = column.label
+
+      // console.log(row, column, cellValue, '=============ds');
+      return row.total == 0 ? '--' : Number(cellValue).toFixed(2) + '%'
+    },
     changeProvince(val) {
       console.log(val);
       this.citySelect = {};
@@ -331,9 +342,9 @@ export default {
       stationDefenseStatistics(message).then((res) => {
         this.tableData = res.data.data;
         this.tableData.forEach((item, index) => {
-          item.firstAlarm = this.formatDate(item.firstAlarm);
-          item.lastAlarm = this.formatDate(item.lastAlarm);
-          item.probability = item.probability + "%";
+          item.firstAlarm = item.firstAlarm ? this.formatDate(item.firstAlarm) : '';
+          item.lastAlarm = item.lastAlarm ? this.formatDate(item.lastAlarm) : '';
+          item.probability = item.total == 0 ? '--' : Number(item.probability).toFixed(2)
         });
         this.total = res.data.total;
       });
@@ -357,6 +368,7 @@ export default {
     tableToExcel(tableData) {
       const headArr = Object.keys(tableData[0]); // 要导出的json数据 // 列标题
       let str = "<tr>";
+
       headArr[0] = "province_name";
       headArr[1] = "city_name";
       headArr[2] = "substation_level";
@@ -391,7 +403,7 @@ export default {
             item = "防御失败次数";
             break;
           case "probability":
-            item = "防御成功率";
+            item = "防御成功率(%)";
             break;
           case "firstAlarm":
             item = "首次发生时间";
@@ -406,21 +418,27 @@ export default {
         str += "<tr>";
         for (const key of headArr) {
           // 增加\t为了不让表格显示科学计数法或者其他格式
-          str += `<td>${tableData[i][key] + "\t"}</td>`;
+          if (key == 'substation_level') {
+            str += `<td>${levelTemp[tableData[i][key] - 1] + "\t"}</td>`;
+          } else {
+            str += `<td>${tableData[i][key] + "\t"}</td>`;
+          }
         }
         str += "</tr>";
       } // Worksheet名
       const worksheet = "Sheet1";
       const uri = "data:application/vnd.ms-excel;base64,"; // 下载的表格模板数据
 
-      const template = `<html xmlns:o="urn:schemas-microsoft-com:office:office"
-    xmlns:x="urn:schemas-microsoft-com:office:excel"
-    xmlns="http://www.w3.org/TR/REC-html40">
-    <head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
-    <x:Name>${worksheet}</x:Name>
-    <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
-    </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-    </head><body><table>${str}</table></body></html>`; // 下载模板 // 输出base64编码
+      const template = `<html
+             xmlns:o="urn:schemas-microsoft-com:office:office" 
+             xmlns:x="urn:schemas-microsoft-com:office:excel"
+        xmlns="http://www.w3.org/TR/REC-html40">
+      <head> <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+          <x:Name>${worksheet}</x:Name>
+          <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+          </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--> </head>
+    <body><table style="vnd.ms-excel.numberformat:@" >${str}</table></body>
+      </html>`;// 下载模板 // 输出base64编码
       const base64 = function (s) {
         return window.btoa(unescape(encodeURIComponent(s)));
       };
@@ -737,42 +755,31 @@ export default {
 }
 </style>
 <style>
-/* .inputSelectBacPoper .el-select-dropdown__list,
-.inputSelectBacPoper .el-picker-panel__content {
-  background: linear-gradient(180deg, rgba(8, 57, 87, 0.9) 0%, rgba(9, 24, 39, 0.9) 100%) !important;
-}
-
-.inputSelectBacPoper .el-picker-panel {
-  border: 0px;
-}
-
 .inputSelectBacPoper {
+  background: linear-gradient(180deg, rgba(8, 57, 87, 0.9) 0%, rgba(9, 24, 39, 0.9) 100%) !important;
   border: 1px solid rgba(21, 154, 255, 0.7) !important;
+  color: #fff !important;
 }
 
-.inputSelectBacPoper .available {
-  color: #99afcc;
-}
-
-.inputSelectBacPoper .popper__arrow::after,
-.inputSelectBacPoper .popper__arrow {
-  border-bottom-color: rgba(21, 154, 255, 0.7) !important;
+.inputSelectBacPoper .el-picker-panel__body-wrapper {
+  color: #fff !important;
 }
 
 .inputSelectBacPoper .in-range div {
-  background: rgb(51, 125, 150) !important;
+  background: linear-gradient(rgba(20, 143, 255, 0.3) 25.38%, rgba(21, 246, 238, 0.5) 94.06%)
 }
 
-.inputSelectBacPoper .el-select-dropdown__item.hover,
-.inputSelectBacPoper .el-select-dropdown__item:hover {
-  background: linear-gradient(270deg, rgba(91, 222, 218, 0.3) -7.2%, rgba(23, 82, 101, 0.5) 100%);
-  color: #d0deee;
-} */
+.inputSelectBacPoper .el-date-table td.end-date span {
+  background-color: none !important;
+}
+
+.inputSelectBacPoper .el-date-table td.start-date span {
+  background-color: none !important;
+}
 
 
-.inputSelectBacPoper {
-  background: linear-gradient(180deg, rgba(8, 57, 87, 0.9) 0%, rgba(9, 24, 39, 0.9) 100%) !important;
-  border: 1px solid rgba(21, 154, 255, 0.7) !important
+.inputSelectBacPoper .el-picker-panel__icon-btn {
+  color: #fff;
 }
 
 .inputSelectBacPoper.el-popper[x-placement^=bottom] .popper__arrow {

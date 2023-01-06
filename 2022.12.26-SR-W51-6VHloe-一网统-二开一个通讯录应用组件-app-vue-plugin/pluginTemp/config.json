@@ -1,0 +1,21 @@
+{
+  "id": "4e293bb2-e633-487e-9db0-ee78eb8d159d",
+  "type": "app",
+  "main": "app.452994e6.js",
+  "version": "2",
+  "props": {
+    "type": "customize",
+    "img": "APP_0001.png",
+    "name": "应用二开_vue",
+    "loadStyle": 0,
+    "lib": [],
+    "css_script": [],
+    "customconf": [
+      "id",
+      "asset_id"
+    ]
+  },
+  "configuration": true,
+  "requirement-number": "SR-W51-6VHloe",
+  "requirement-name": "通讯录应用组件"
+}

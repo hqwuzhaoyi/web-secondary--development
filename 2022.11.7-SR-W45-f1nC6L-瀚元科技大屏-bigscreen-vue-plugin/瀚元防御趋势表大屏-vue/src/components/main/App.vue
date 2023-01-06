@@ -64,7 +64,7 @@
         <div class="alarmt_two_main">
           <div class="alarmt_two_main_echart">
             <div class="alarmt_two_main_echart_title border_title">
-              防御结果分时统计（{{ paramsObj.period || '年' }}）
+              防御结果分时统计（{{ period || '年' }}）
             </div>
             <div class="alarmt_two_main_echart_main" ref="alarmt_echart"></div>
 
@@ -169,9 +169,10 @@ export default {
       { value: 12, label: '最近一年' },
       { value: 24, label: '最近两年' },
       ],
+      period: '年',
       totalArr: {},
-      Gechart: null,
-      paramsObj: { province: '', city: '', substationName: '', period: '' }
+      GechartE: null,
+      paramsObj: { province: '', city: '', substationName: '', period: 24 }
     };
   },
   props: {
@@ -180,6 +181,7 @@ export default {
     componentId: String,
     configuration: Object,
     options: Object,
+    updateProcess: Function,
     variable: Object
   },
   computed: {
@@ -236,24 +238,20 @@ export default {
     'paramsObj.province': {
       handler(val) {
         if (!this.totalArr.substationOp) return
-        if (val == '' || val == undefined) return
-        let substationOp = this.totalArr.substationOp
-        this.substationOp = substationOp.filter((x, i) => {
-
-          let filed = String(x.id)
-          let strl = filed.length
-
-          return filed.substr(0, 2) == val
-        })
-
-        let cityOp = this.totalArr.cityOp
-        this.cityOp = cityOp.filter((x, i) => {
-
-          let filed = String(x.value)
-          let strl = filed.length
-
-          return filed.substr(0, strl - 2) == val
-        })
+        if (!(Boolean(this.province) == false && Boolean(this.city) == false && Boolean(this.substationName) == false)) {
+          let substationOp = this.totalArr.substationOp
+          this.substationOp = substationOp.filter((x, i) => {
+            let filed = String(x.id)
+            let strl = filed.length
+            return filed.substr(0, 2) == val
+          })
+          let cityOp = this.totalArr.cityOp
+          this.cityOp = cityOp.filter((x, i) => {
+            let filed = String(x.value)
+            let strl = filed.length
+            return filed.substr(0, strl - 2) == val
+          })
+        }
         if (!this.city && !this.substationName && this.province) this.queryTable()
       },
 
@@ -263,15 +261,17 @@ export default {
     'paramsObj.city': {
       handler(val) {
         if (!this.totalArr.substationOp) return
-        if (val == '' || val == undefined) return
-        let substationOp = this.totalArr.substationOp
-        this.substationOp = substationOp.filter((x, i) => {
-          let filed = String(x.id)
-          let l = x.statno.length
-          let strl = filed.length
+        if (!(Boolean(this.province) == false && Boolean(this.city) == false && Boolean(this.substationName) == false)) {
+          let substationOp = this.totalArr.substationOp
+          this.substationOp = substationOp.filter((x, i) => {
+            let filed = String(x.id)
+            let l = x.statno.length
+            let strl = filed.length
 
-          return filed.substr(0, strl - l) == val
-        })
+            return filed.substr(0, strl - l) == val
+          })
+        }
+
         if (this.city && !this.substationName) this.queryTable()
       },
 
@@ -288,13 +288,14 @@ export default {
     },
   },
 
-  mounted() {
+  async mounted() {
     // this.$nextTick(() => {
     //   this.tableHeight = this.$refs.alarmt_main_three.offsetHeight;
     //   console.log('this.tableHeight', this.tableHeight);
     // })
 
-
+    let date = { 0: '周', 1: '月', 3: '季度', 6: '半年', 12: '年', 24: '两年' }
+    this.period = date[this.paramsObj.period]
     this.pubSub &&
       this.pubSub.subscribe(
         "updateChart" + this.componentId,
@@ -326,6 +327,7 @@ export default {
           this.paramsObj.substationName = substationOp?.value
           this.paramsObj.province = provinceOp?.value
           this.paramsObj.city = cityOp?.value
+          if (data?.variable?.current_value === '' || data?.variable?.default_value === '') this.queryTable()
         }
       );
     window.componentCenter?.register &&
@@ -342,8 +344,35 @@ export default {
     this.queryTable()
 
 
-    this.querySelect()
+    await this.querySelect()
+    this.province = this.variable?.default_value && JSON.parse(this.variable?.default_value).province_id || this.variable?.current_value && JSON.parse(this.variable?.current_value).province_id || ''
+    this.city = this.variable?.default_value && JSON.parse(this.variable?.default_value).city_id || this.variable?.current_value && JSON.parse(this.variable?.current_value).city_id || ''
+    this.substationName = this.variable?.default_value && JSON.parse(this.variable?.default_value).substation_no || this.variable?.current_value && JSON.parse(this.variable?.current_value).substation_no || ''
+    this.paramsObj.province = this.province == '' ? '' : Number(this.province)
+    this.paramsObj.city = this.city == '' ? '' : Number(this.city)
+    let substationOp = {}
+    let provinceOp = {}
+    let cityOp = {}
+    if (this.totalArr.substationOp) {
+      substationOp = this.totalArr.substationOp.find((x, i) => {
+        return x.statno == this.substationName
+      })
+    }
+    if (this.totalArr.provinceOp) {
+      provinceOp = this.totalArr.provinceOp.find((x, i) => {
+        return x.value == this.province
+      })
+    }
+    if (this.totalArr.cityOp) {
+      cityOp = this.totalArr.cityOp.find((x, i) => {
+        return x.value == this.city
+      })
+    }
 
+    this.paramsObj.substationName = substationOp?.value
+    this.paramsObj.province = provinceOp?.value
+    this.paramsObj.city = cityOp?.value
+    if (data?.variable?.current_value === '' || data?.variable?.default_value === '') this.queryTable()
     // this.initEchartFn(this.tableData)
   },
   methods: {
@@ -376,6 +405,8 @@ export default {
       params.province = this.paramsObj.province || this.province
       params.city = this.paramsObj.city || this.city
       params.substationName = this.paramsObj.substationName || this.substationName
+      let date = { 0: '周', 1: '月', 3: '季度', 6: '半年', 12: '年', 24: '两年' }
+      this.period = date[this.paramsObj.period]
       TOPNAlarmInfo(params).then(res => {
         this.echartsDat = res.data
         this.timeAll = JSON.parse(JSON.stringify(timeAll))
@@ -424,6 +455,7 @@ export default {
         let tab = []
 
         this.timeAll.forEach((x, i) => {
+          x.probability = x.probability == '--' ? x.probability : Number(x.probability).toFixed(2)
           a.push(x)
           if ((i + 1) % 8 == 0) {
             tab.push(a)
@@ -443,8 +475,8 @@ export default {
 
     },
     //下拉菜单数据
-    querySelect() {
-      queryDropDownBox().then(res => {
+    async querySelect() {
+      await queryDropDownBox().then(res => {
         console.log(res.data);
         let tempTotal = res.data
         let objArr = { provinceOp: [], cityOp: [], substationOp: [] }
@@ -462,33 +494,8 @@ export default {
           this[key] = objArr[key]
         }
 
-        this.province = this.variable?.default_value && JSON.parse(this.variable?.default_value).province_id || this.variable?.current_value && JSON.parse(this.variable?.current_value).province_id || ''
-        this.city = this.variable?.default_value && JSON.parse(this.variable?.default_value).city_id || this.variable?.current_value && JSON.parse(this.variable?.current_value).city_id || ''
-        this.substationName = this.variable?.default_value && JSON.parse(this.variable?.default_value).substation_no || this.variable?.current_value && JSON.parse(this.variable?.current_value).substation_no || ''
-        this.paramsObj.province = this.province == '' ? '' : Number(this.province)
-        this.paramsObj.city = this.city == '' ? '' : Number(this.city)
-        let substationOp = {}
-        let provinceOp = {}
-        let cityOp = {}
-        if (this.totalArr.substationOp) {
-          substationOp = this.totalArr.substationOp.find((x, i) => {
-            return x.statno == this.substationName
-          })
-        }
-        if (this.totalArr.provinceOp) {
-          provinceOp = this.totalArr.provinceOp.find((x, i) => {
-            return x.value == this.province
-          })
-        }
-        if (this.totalArr.cityOp) {
-          cityOp = this.totalArr.cityOp.find((x, i) => {
-            return x.value == this.city
-          })
-        }
 
-        this.paramsObj.substationName = substationOp?.value
-        this.paramsObj.province = provinceOp?.value
-        this.paramsObj.city = cityOp?.value
+
       }).catch(err => {
         console.log(err);
       })
@@ -607,7 +614,7 @@ export default {
         ],
         series: [
           {
-            name: '防御分时',
+            name: '防御成功次数',
             type: 'line',
             smooth: true,
             showSymbol: false,
@@ -655,15 +662,15 @@ export default {
         ]
       };
 
-      this.Gechart = echarts.init(this.$refs.alarmt_echart);
+      this.GechartE = echarts.init(this.$refs.alarmt_echart);
 
-      this.Gechart.setOption(option);
+      this.GechartE.setOption(option);
+      this.GechartE.resize()
+      // const task = () => {
+      //   this.GechartE.resize();
 
-      const task = () => {
-        this.Gechart.resize();
-
-      };
-      window.addEventListener("resize", debounce(task, 300));
+      // };
+      // window.addEventListener("resize", debounce(task, 300));
     },
     //重置
     restFn() {
@@ -679,11 +686,14 @@ export default {
       }
 
       this.paramsObj = a
+      this.paramsObj.period = 24
+      let date = { 0: '周', 1: '月', 3: '季度', 6: '半年', 12: '年', 24: '两年' }
+      this.period = date[this.paramsObj.period]
       this.queryTable()
     },
     tableToExcel(tableData) {
       const headArr = Object.keys(tableData[0])
-      const titleObj = { time: '日期', successNum: '成功防御次数', failedNum: '防御失败次数', probability: '成功率', total: '防御总次数', }
+      const titleObj = { time: '时间', successNum: '成功防御次数', failedNum: '防御失败次数', probability: '成功率', total: '防御总次数', }
       // 要导出的json数据
       // 列标题
       let str = "<tr>"
@@ -697,7 +707,13 @@ export default {
         str += '<tr>';
         for (const key of headArr) {
           // 增加\t为了不让表格显示科学计数法或者其他格式
-          str += `<td>${tableData[i][key] + '\t'}</td>`;
+          if (key == 'time') {
+            str += `<td>${tableData[i][key] + '\t'}</td>`;
+          } else {
+            str += `<td>${tableData[i][key] + '\t'}</td>`;
+          }
+
+
         }
         str += '</tr>';
       }
@@ -706,14 +722,16 @@ export default {
       const uri = 'data:application/vnd.ms-excel;base64,';
 
       // 下载的表格模板数据
-      const template = `<html xmlns:o="urn:schemas-microsoft-com:office:office" 
-    xmlns:x="urn:schemas-microsoft-com:office:excel" 
-    xmlns="http://www.w3.org/TR/REC-html40">
-    <head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
-    <x:Name>${worksheet}</x:Name>
-    <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
-    </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-    </head><body><table>${str}</table></body></html>`;
+      const template = `<html
+             xmlns:o="urn:schemas-microsoft-com:office:office" 
+             xmlns:x="urn:schemas-microsoft-com:office:excel"
+        xmlns="http://www.w3.org/TR/REC-html40">
+      <head> <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+          <x:Name>${worksheet}</x:Name>
+          <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+          </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--> </head>
+    <body><table style="vnd.ms-excel.numberformat:@" >${str}</table></body>
+      </html>`;
       // 下载模板
 
       // 输出base64编码
@@ -731,11 +749,11 @@ export default {
       a.click();
     },
     do_EventCenter_setValue(value) {
-      this.Gechart.resize();
-      this.Gechart2.resize();
+      this.GechartE.resize();
+      // this.GechartE2.resize();
 
     },
-    Event_Center_getName: () => {
+    Event_Center_getName() {
       return this.id;
     }
   }

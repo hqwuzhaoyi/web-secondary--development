@@ -57,16 +57,16 @@
         <div class="alarmt_two_main">
           <div class="alarmt_two_main_echart">
             <div class="alarmt_two_main_echart_title border_title">
-              巡检任务趋势表（{{ period }}）
+              巡检任务趋势表（{{ titlePiod }}）
             </div>
             <div class="alarmt_two_main_echart_main" ref="alarmt_echart_top"></div>
             <div class="alarmt_two_main_echart_title border_title" style="margin-top: 20px">
-              巡检任务趋势表（{{ period }}）
+              巡检任务执行率趋势表（{{ titlePiod }}）
             </div>
             <div class="alarmt_two_main_echart_main" ref="alarmt_echart_bot"></div>
           </div>
           <div class="alarmt_two_main_table">
-            <div class="alarmt_two_main_table_title  border_title">告警信息级别
+            <div class="alarmt_two_main_table_title  border_title">巡检任务表
               <button class="alarmt_two_main_button" @click="tableToExcel(tableData)">导出</button>
             </div>
             <div ref="alarmt_main" class="alarmt_two_main_table_main">
@@ -77,7 +77,7 @@
                 <el-table-column prop="total" label="任务总次数"></el-table-column>
                 <el-table-column prop="Execute" label="任务执行次数"></el-table-column>
                 <el-table-column prop="noExecute" label="未执行次数"></el-table-column>
-                <el-table-column prop="probability" label="任务执行率(%)"></el-table-column>
+                <el-table-column prop="probability" :formatter="oneFixed" label="任务执行率(%)"></el-table-column>
               </el-table>
               <!-- v-show="period == '月'" -->
               <div class="page_two" style="margin-top:16px">
@@ -132,8 +132,9 @@ export default {
       myChartTwo: null,
       tableData: [],
       period: "年",
+      titlePiod: '年',
       dataAll: [],
-      pageObj: { currentPage: 1, pageSize: 10, total: null },
+      pageObj: { currentPage: 1, pageSize: 10, total: null, period: '年' },
       periodOption: [
         {
           label: "最近一年",
@@ -176,6 +177,7 @@ export default {
     componentId: String,
     configuration: Object,
     options: Object,
+    updateProcess: Function,
     variable: Object
 
   },
@@ -185,42 +187,44 @@ export default {
       handler(val) {
 
         if (this.provinceData.length == 0) return
-        if (val == '' || val == undefined || val.province_name == undefined) return
-        this.citySelect = {};
-        this.cityOption = [];
-        this.stationSelect = {};
-        this.stationOption = [];
+        if (!(Boolean(this.province) == false && Boolean(this.city) == false && Boolean(this.substationName) == false)) {
+          this.citySelect = {};
+          this.cityOption = [];
+          this.stationSelect = {};
+          this.stationOption = [];
 
-        this.cityData.forEach((item, index) => {
-          if (item.province_name == val?.province_name) {
-            this.cityOption.push(item);
-          }
-        });
-        this.stationData.forEach((item, index) => {
-          if (item.province_name == val?.province_name) {
-            this.stationOption.push(item);
-          }
-        });
+          this.cityData.forEach((item, index) => {
+            if (item.province_name == val?.province_name) {
+              this.cityOption.push(item);
+            }
+          });
+          this.stationData.forEach((item, index) => {
+            if (item.province_name == val?.province_name) {
+              this.stationOption.push(item);
+            }
+          });
+        }
+
 
         if (!this.city && !this.substationName && this.province) this.searchTable()
       },
 
-      // immediate: true,
       deep: true
     },
     'citySelect': {
       handler(val) {
+        if (!(Boolean(this.province) == false && Boolean(this.city) == false && Boolean(this.substationName) == false)) {
+          this.stationSelect = {};
+          this.stationOption = [];
 
-        if (!this.provinceData.length == 0) return
-        if (val == '' || val == undefined || val.city_name == undefined) return
-        this.stationSelect = {};
-        this.stationOption = [];
+          this.stationData.forEach((item, index) => {
+            if (item.city_name == val?.city_name) {
+              this.stationOption.push(item);
+            }
+          });
+        }
 
-        this.stationData.forEach((item, index) => {
-          if (item.city_name == val?.city_name) {
-            this.stationOption.push(item);
-          }
-        });
+
         if (this.city && !this.substationName) this.searchTable()
       },
 
@@ -314,6 +318,8 @@ export default {
           this.stationSelect = substationOp
           this.provinceSelect = provinceOp
           this.citySelect = cityOp
+
+          if (data?.variable?.current_value === '' || data?.variable?.default_value === '') this.searchTable()
         }
       );
     window.componentCenter?.register &&
@@ -328,6 +334,13 @@ export default {
   },
   methods: {
 
+    oneFixed(row, column, cellValue, index) {
+
+      let colName = column.label
+
+      // console.log(row, column, cellValue, '=============ds');
+      return row.total == 0 ? '--' : Number(cellValue).toFixed(2)
+    },
     //去重
     removeDuplicateObj(arr, key) {
       let obj = {};
@@ -375,6 +388,7 @@ export default {
         // pageSize: this.pageSize || "", //页面数据条数  数字
         // pageNo: this.pageNo || "", //页码  数字
       };
+      this.titlePiod = this.period
       this.newLineChart(message)
     },
     reloadSearch() {
@@ -435,6 +449,7 @@ export default {
           x.time = moment(x.time).format(dateStr)
           return x;
         })
+        this.pageObj.currentPage = 1
         this.tableData = this.dataAll.slice(0, this.pageObj.currentPage * this.pageObj.pageSize)
         this.pageObj.total = this.dataAll.length
         this.total = res.data.length;
@@ -446,7 +461,7 @@ export default {
           this.legendData.push(chuli(x.time))
           this.ExecuteData.push(x.Execute)
           this.noExecuteData.push(x.noExecute)
-          this.probabilityData.push(x.probability)
+          this.probabilityData.push({ value: x.probability, total: x.total })
         })
         this.initEchartFn()
         this.initEchartFnTwo()
@@ -457,6 +472,13 @@ export default {
       const titleObj = { time: '日期', total: '任务总次数', Execute: '任务执行次数', noExecute: '未执行次数', probability: '任务执行率(%)' }
       // 要导出的json数据
       // 列标题
+      let aTime = { 年: 'YYYY.MM', 月: 'YYYY.MM.DD', 周: 'YYYY.MM.DD' }
+      let st1 = aTime[this.titlePiod]
+
+      let tableData2 = JSON.parse(JSON.stringify(tableData))
+      tableData2.forEach((x, i) => {
+        x.time = x.time ? moment(x.time).format(st1) : ''
+      })
       let str = "<tr>"
       headArr.forEach((item, index) => {
 
@@ -464,11 +486,18 @@ export default {
 
       })
       // 循环遍历，每行加入tr标签，每个单元格加td标签
-      for (let i = 0; i < tableData.length; i++) {
+      for (let i = 0; i < tableData2.length; i++) {
         str += '<tr>';
         for (const key of headArr) {
           // 增加\t为了不让表格显示科学计数法或者其他格式
-          str += `<td>${tableData[i][key] + '\t'}</td>`;
+          if (key == 'probability') {
+            str += `<td>${(tableData2[i].total == 0 ? '--' : tableData2[i][key]) + '\t'}</td>`;
+          } else {
+
+
+            str += `<td>${tableData2[i][key] + '\t'}</td>`;
+          }
+          // str += `<td>${tableData[i][key] + '\t'}</td>`;
         }
         str += '</tr>';
       }
@@ -477,14 +506,16 @@ export default {
       const uri = 'data:application/vnd.ms-excel;base64,';
 
       // 下载的表格模板数据
-      const template = `<html xmlns:o="urn:schemas-microsoft-com:office:office" 
-        xmlns:x="urn:schemas-microsoft-com:office:excel" 
+      const template = `<html
+             xmlns:o="urn:schemas-microsoft-com:office:office" 
+             xmlns:x="urn:schemas-microsoft-com:office:excel"
         xmlns="http://www.w3.org/TR/REC-html40">
-        <head><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
-        <x:Name>${worksheet}</x:Name>
-        <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
-        </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]-->
-        </head><body><table>${str}</table></body></html>`;
+      <head> <!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+          <x:Name>${worksheet}</x:Name>
+          <x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+          </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--> </head>
+    <body><table style="vnd.ms-excel.numberformat:@" >${str}</table></body>
+      </html>`;
       // 下载模板
       const base64 = function (s) {
         return window.btoa(unescape(encodeURIComponent(s)));
@@ -654,10 +685,10 @@ export default {
       };
 
       option && this.myChart.setOption(option);
-      const task = () => {
-        this.myChart.resize();
-      };
-      window.addEventListener("resize", debounce(task, 300));
+      // const task = () => {
+      //   this.myChart.resize();
+      // };
+      // window.addEventListener("resize", debounce(task, 300));
     },
     initEchartFnTwo() {
       if (this.myChartTwo !== null && this.myChartTwo !== "" && this.myChartTwo !== undefined) {
@@ -668,7 +699,29 @@ export default {
       let option = {
         color: ['rgba(77, 184, 247, 1)'],
         tooltip: {
-          trigger: 'axis'
+          trigger: 'axis',
+          formatter: function (params) {
+            let htmlStr = '';
+            for (let i = 0; i < params.length; i++) {
+              let param = params[i];
+              let xName = param.name;//x轴的名称
+              let seriesName = param.seriesName;//图例名称
+
+              let value = (param.data.total == undefined || param.data.total == 0) ? '--' : Number(param.value).toFixed(2);//y轴值
+              let year = param.data.year
+
+              let color = param.color;//图例颜色
+              if (i === 0) {
+                htmlStr += xName + '<br/>';//x轴的名称
+              }
+              htmlStr += '<div style="display:flex;align-items:center">';
+              htmlStr += '<span style="margin-right:5px;display:inline-block;width:10px;height:10px;border-radius:5px;background-color:' + color + ';"></span>';//一个点
+              htmlStr += '<div style="display:flex;justify-content: space-between;flex:1" >' + '<span>' + seriesName + '：' + '</span>' + '<span>' + `${value || 0}` + '</span>' + '</div>';//圆点后面显示的文本
+              htmlStr += '</div>';
+            }
+            return htmlStr;
+
+          }
         },
         legend: {
           show: false
@@ -744,20 +797,25 @@ export default {
               ])
             },
             // data: [140, 232, 101, 264, 90, 340, 250]
-            data: this.ExecuteData
+            data: this.probabilityData
           }
         ]
       };
 
       option && this.myChartTwo.setOption(option);
-      const tasks = () => {
-        this.myChartTwo.resize();
-      };
-      window.addEventListener("resize", debounce(tasks, 300));
+      // const tasks = () => {
+      //   this.myChartTwo.resize();
+      // };
+      // window.addEventListener("resize", debounce(tasks, 300));
     },
-    // Event_Center_getName: () => {
-    //   return this.id;
-    // }
+    do_EventCenter_setValue(value) {
+      this.myChart.resize();
+      this.myChartTwo.resize();
+
+    },
+    Event_Center_getName() {
+      return this.id;
+    }
   }
 };
 
