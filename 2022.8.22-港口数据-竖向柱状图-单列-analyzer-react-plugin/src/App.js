@@ -44,12 +44,12 @@ export default class App extends Component {
 
   componentDidMount() {
     if (process.env.NODE_ENV !== "development") {
-      this.refs["jsgk_barYs"].parentNode.style.width = "100%";
-      this.refs["jsgk_barYs"].parentNode.style.height = "100%";
-      this.refs["jsgk_barYs"].parentNode.parentNode.style.overflow = "visible";
-      this.refs["jsgk_barYs"].parentNode.parentNode.parentNode.parentNode.style.overflow = "visible";
-      this.refs["jsgk_barYs"].parentNode.parentNode.parentNode.parentNode.parentNode.style.overflow = "visible";
-      this.refs["jsgk_barYs"].parentNode.parentNode.style.minHeight = 0;
+      this.refs["jsgk_barY"].parentNode.style.width = "100%";
+      this.refs["jsgk_barY"].parentNode.style.height = "100%";
+      this.refs["jsgk_barY"].parentNode.parentNode.style.overflow = "visible";
+      this.refs["jsgk_barY"].parentNode.parentNode.parentNode.parentNode.style.overflow = "visible";
+      this.refs["jsgk_barY"].parentNode.parentNode.parentNode.parentNode.parentNode.style.overflow = "visible";
+      this.refs["jsgk_barY"].parentNode.parentNode.style.minHeight = 0;
     }
 
     this.handleEchartsData();
@@ -64,7 +64,6 @@ export default class App extends Component {
 
     let spacing = Number(this.barDataSpacing);
     let leftPosition = Number(this.barDataLeftPosition);
-
     // X轴数据
     let xAxisData = [];
     // 图例数据
@@ -74,34 +73,25 @@ export default class App extends Component {
     // 二次处理数据
     let seriesData = [];
 
-    propsData.forEach((item, index) => {
+    propsData[0].forEach((item, index) => {
       if (index > 0) {
-        xAxisData.push(item[0]);
-        if (xAxisData.length < 1) {
-          legendData.push(item[1]);
-          dataList.push({
-            name: item[1],
-            data: [item[2]],
-          });
-        } else {
-          if (legendData.includes(item[1])) {
-            dataList.forEach((e, i) => {
-              if (item[1] === e.name) {
-                e.data.push(item[2]);
-              }
-            });
-          } else {
-            legendData.push(item[1]);
-            dataList.push({
-              name: item[1],
-              data: [item[2]],
-            });
+        dataList[index - 1] = {
+          name: "",
+          data: [],
+        };
+        propsData.forEach((e, i) => {
+          if (i > 0) {
+            xAxisData.push(e[0]);
+            legendData.push(item);
+            dataList[index - 1].name = item;
+            dataList[index - 1].data.push(e[index]);
           }
-        }
+        });
       }
     });
 
     xAxisData = [...new Set(xAxisData)];
+    legendData = [...new Set(legendData)];
 
     dataList.forEach((item, index) => {
       let dataObj = {
@@ -144,7 +134,7 @@ export default class App extends Component {
   }
 
   initEcharts(xAxisData, legendData, seriesData) {
-    let myChart = echarts.init(this.refs["jsgk_barYs"]);
+    let myChart = echarts.init(this.refs["jsgk_barY"]);
     let option = {};
 
     let barWidth = Number(this.barDataWdith);
@@ -324,6 +314,6 @@ export default class App extends Component {
   }
 
   render() {
-    return <div ref="jsgk_barYs" style={{ width: `${this.echartsWidth}`, height: `${this.echartsHeight}` }}></div>;
+    return <div ref="jsgk_barY" style={{ width: `${this.echartsWidth}`, height: `${this.echartsHeight}` }}></div>;
   }
 }

@@ -1,7 +1,7 @@
 {
-  "id": "a733a9e5-5ddc-4b84-8af3-2bdc62f44c13",
+  "id": "4de5527e-0a59-449a-8d45-abb45ed019a5",
   "type": "analyzer",
-  "main": "main.27adb34d.js",
+  "main": "main.565c9c80.js",
   "version": "2",
   "props": {
     "img": "custom_table.png",
@@ -14,6 +14,7 @@
     "cssDep": [],
     "scriptName": "main.b42fe2f5.js",
     "vars": [
+      "柱形数据排列顺序",
       "高度",
       "宽度",
       "背景颜色",
